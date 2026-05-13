@@ -1,0 +1,210 @@
+// Qreative Spaces — Prisma schema
+// Datasource: Postgres. Run `npm run db:migrate` to apply.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  USER
+  SPACE_OWNER
+  ADMIN
+}
+
+enum NoiseLevel {
+  QUIET
+  MODERATE
+  LOUD
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentMethod {
+  MPESA
+  CARD
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Models
+// ─────────────────────────────────────────────────────────────────────────────
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  name          String
+  avatarUrl     String?
+  role          UserRole @default(USER)
+  isSpaceOwner  Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  venues       Venue[]
+  bookings     Booking[]
+  rsvps        Rsvp[]
+  reviewedApps AllyApplication[] @relation("ReviewedApplications")
+
+  @@index([email])
+}
+
+model Venue {
+  id            String     @id @default(cuid())
+  slug          String     @unique
+  name          String
+  tagline       String
+  description   String     @db.Text
+  type          String
+  city          String
+  address       String
+  capacity      Int
+  pricePerHour  Int
+  bookingFee    Int        @default(0)
+  rating        Float      @default(0)
+  reviewCount   Int        @default(0)
+  coverImage    String
+  images        String[]   @default([])
+  amenities     String[]   @default([])
+  moods         String[]   @default([])
+  bestFor       String[]   @default([])
+  noiseLevel    NoiseLevel @default(MODERATE)
+  timeOfDay     String[]   @default([])
+  isVerified    Boolean    @default(false)
+  isPublished   Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  ownerId  String
+  owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  events   Event[]
+  bookings Booking[]
+
+  @@index([city])
+  @@index([type])
+  @@index([slug])
+}
+
+model Event {
+  id               String   @id @default(cuid())
+  slug             String   @unique
+  title            String
+  category         String
+  description      String   @db.Text
+  startDate        DateTime
+  endDate          DateTime
+  city             String
+  pricePerTicket   Int
+  ticketsAvailable Int
+  ticketsSold      Int      @default(0)
+  coverImage       String
+  isFeatured       Boolean  @default(false)
+  organizer        String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  venueId String?
+  venue   Venue?  @relation(fields: [venueId], references: [id], onDelete: SetNull)
+  rsvps   Rsvp[]
+
+  @@index([slug])
+  @@index([startDate])
+}
+
+model Booking {
+  id              String         @id @default(cuid())
+  date            DateTime
+  startTime       String
+  endTime         String
+  guestCount      Int
+  totalAmount     Int
+  status          BookingStatus  @default(PENDING)
+  paymentMethod  PaymentMethod
+  paymentStatus  PaymentStatus  @default(PENDING)
+  paymentRef     String?
+  specialRequests String?        @db.Text
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  venueId String
+  venue   Venue  @relation(fields: [venueId], references: [id], onDelete: Restrict)
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([venueId])
+  @@index([date])
+}
+
+model Rsvp {
+  id         String   @id @default(cuid())
+  attendees  Int
+  reference  String   @unique
+  createdAt  DateTime @default(now())
+
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+}
+
+model AllyApplication {
+  id               String            @id @default(cuid())
+  businessName     String
+  ownerName        String
+  email            String
+  phone            String
+  city             String
+  address          String
+  venueType        String
+  description      String            @db.Text
+  motivation       String            @db.Text
+  inclusivityPlan  String            @db.Text
+  experience       String?           @db.Text
+  status           ApplicationStatus @default(PENDING)
+  reviewNotes      String?           @db.Text
+  submittedAt      DateTime          @default(now())
+  reviewedAt       DateTime?
+
+  reviewedById String?
+  reviewedBy   User?   @relation("ReviewedApplications", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([email])
+}
+
+model ContactMessage {
+  id              String   @id @default(cuid())
+  name            String
+  email           String
+  subject         String
+  message         String   @db.Text
+  isVenueInquiry  Boolean  @default(false)
+  submittedAt     DateTime @default(now())
+}
