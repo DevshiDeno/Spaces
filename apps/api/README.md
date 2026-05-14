@@ -185,6 +185,78 @@ Set `STRIPE_SECRET_KEY` then implement `initiateCard()` in the same file — ret
 | `npm run prisma:studio`        | Open Prisma Studio                            |
 | `npm run type-check`           | `tsc --noEmit`                                |
 
+## Deploying to Fly.io (recommended)
+
+The repo ships with a [Dockerfile](../../Dockerfile), [.dockerignore](../../.dockerignore), and [fly.toml](../../fly.toml) at the monorepo root, configured for the **`jnb` (Johannesburg)** region so M-Pesa latency to Nairobi stays around 50 ms.
+
+### One-time setup
+
+```bash
+# 1. Install flyctl
+#    macOS:   brew install flyctl
+#    Windows: iwr https://fly.io/install.ps1 -useb | iex
+#    Linux:   curl -L https://fly.io/install.sh | sh
+
+fly auth login
+
+# 2. Provision Postgres (use Neon — free + serverless — over Fly Postgres)
+#    Sign up at https://neon.tech → create project → copy connection string
+
+# 3. Claim the Fly app (does NOT deploy yet)
+cd c:/Code/source/repos/Spaces
+fly launch --no-deploy --copy-config --name qspaces-api --region jnb
+
+# 4. Set secrets (these are encrypted, never leave Fly)
+fly secrets set \
+  DATABASE_URL="postgresql://...neon.tech/qspaces?sslmode=require" \
+  JWT_SECRET="$(openssl rand -base64 48)" \
+  CORS_ORIGINS="https://qreativespaces.co.ke,https://www.qreativespaces.co.ke"
+
+# Optional payment + email secrets (the API falls back to mocked success without these)
+fly secrets set \
+  MPESA_CONSUMER_KEY=... \
+  MPESA_CONSUMER_SECRET=... \
+  MPESA_SHORTCODE=... \
+  MPESA_PASSKEY=... \
+  MPESA_CALLBACK_URL=https://qspaces-api.fly.dev/api/payments/mpesa/callback
+```
+
+### Deploy
+
+```bash
+fly deploy
+```
+
+That's it. The Dockerfile is multi-stage:
+1. **Builder** — installs all workspace deps, runs `prisma generate` + `nest build`
+2. **Runtime** — prod-only deps + compiled `dist/` + Prisma schema, ~180 MB final image
+3. **Container start** — runs `prisma migrate deploy` then `node dist/main.js`
+
+Migrations apply on every deploy automatically — safe to re-run.
+
+### Verifying the deploy
+
+```bash
+fly logs              # tail container output
+fly ssh console       # shell into the running machine
+curl https://qspaces-api.fly.dev/api/health
+```
+
+### Seeding production (one-time)
+
+```bash
+fly ssh console -C "npm run prisma:seed --workspace apps/api"
+```
+
+> ⚠️ **Disable the seed before going live for real customers** — it inserts demo accounts with weak passwords.
+
+### Updating the M-Pesa callback URL
+
+Daraja needs your callback URL pre-registered. Once you have your Fly app URL:
+
+1. Set `MPESA_CALLBACK_URL=https://qspaces-api.fly.dev/api/payments/mpesa/callback` via `fly secrets set`
+2. Update it in Safaricom's developer portal under your sandbox/production app
+
 ## What's still TODO before production
 
 - Real M-Pesa Daraja + Stripe integration (see above)

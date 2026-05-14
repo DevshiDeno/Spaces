@@ -1,0 +1,39 @@
+**/node_modules
+**/dist
+**/build
+**/.next
+**/.turbo
+**/.vite
+
+# Local env (we use Fly secrets in production)
+.env
+.env.*
+!.env.example
+
+# Source control
+.git
+.gitignore
+.gitattributes
+.github
+
+# Frontend artifacts — image is API-only
+apps/web/dist
+apps/web/.vite
+apps/web/coverage
+
+# Editor / OS
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+*.log
+*.tsbuildinfo
+
+# Tests / coverage / docs we don't need in the image
+coverage
+README.md
+**/README.md
+docs
+
+# Backups
+_backup
