@@ -18,7 +18,18 @@ http.interceptors.request.use((config) => {
 });
 
 http.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    const body = res.data as unknown;
+    if (
+      body &&
+      typeof body === 'object' &&
+      'success' in body &&
+      'data' in (body as Record<string, unknown>)
+    ) {
+      res.data = (body as unknown as { data: unknown }).data;
+    }
+    return res;
+  },
   (error: AxiosError<{ message?: string }>) => {
     if (error.response?.status === 401) {
       useAuthStore.getState().logout();

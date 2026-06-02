@@ -4,6 +4,7 @@ import { PublicLayout } from '@/layouts/PublicLayout';
 import { AuthLayout } from '@/layouts/AuthLayout';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { ProtectedRoute } from './ProtectedRoute';
+import { RoleGate } from './RoleGate';
 import { FullPageSpinner } from '@/components/ui/Spinner';
 import { ErrorBoundary } from '@/app/ErrorBoundary';
 
@@ -21,9 +22,14 @@ const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 const SignInPage = lazy(() => import('@/pages/auth/SignInPage'));
 const SignUpPage = lazy(() => import('@/pages/auth/SignUpPage'));
+const AcceptInvitePage = lazy(() => import('@/pages/auth/AcceptInvitePage'));
+const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('@/pages/auth/ResetPasswordPage'));
 
 const DashboardOverviewPage = lazy(() => import('@/pages/dashboard/DashboardOverviewPage'));
 const DashboardSpacesPage = lazy(() => import('@/pages/dashboard/DashboardSpacesPage'));
+const DashboardSpaceNewPage = lazy(() => import('@/pages/dashboard/DashboardSpaceNewPage'));
+const DashboardSpaceEditPage = lazy(() => import('@/pages/dashboard/DashboardSpaceEditPage'));
 const DashboardApplicationsPage = lazy(() => import('@/pages/dashboard/DashboardApplicationsPage'));
 const DashboardBookingsPage = lazy(() => import('@/pages/dashboard/DashboardBookingsPage'));
 const DashboardPagesPage = lazy(() => import('@/pages/dashboard/DashboardPagesPage'));
@@ -57,6 +63,9 @@ export const router = createBrowserRouter([
     children: [
       { path: '/sign-in', element: withSuspense(<SignInPage />) },
       { path: '/sign-up', element: withSuspense(<SignUpPage />) },
+      { path: '/accept-invite/:token', element: withSuspense(<AcceptInvitePage />) },
+      { path: '/forgot-password', element: withSuspense(<ForgotPasswordPage />) },
+      { path: '/reset-password/:token', element: withSuspense(<ResetPasswordPage />) },
     ],
   },
   {
@@ -69,11 +78,62 @@ export const router = createBrowserRouter([
     errorElement: <ErrorBoundary />,
     children: [
       { index: true, element: withSuspense(<DashboardOverviewPage />) },
-      { path: 'spaces', element: withSuspense(<DashboardSpacesPage />) },
-      { path: 'bookings', element: withSuspense(<DashboardBookingsPage />) },
-      { path: 'applications', element: withSuspense(<DashboardApplicationsPage />) },
-      { path: 'pages', element: withSuspense(<DashboardPagesPage />) },
-      { path: 'media', element: withSuspense(<DashboardMediaPage />) },
+      {
+        path: 'spaces',
+        element: (
+          <RoleGate allow={['SPACE_OWNER', 'ADMIN']}>
+            {withSuspense(<DashboardSpacesPage />)}
+          </RoleGate>
+        ),
+      },
+      {
+        path: 'spaces/new',
+        element: (
+          <RoleGate allow={['SPACE_OWNER', 'ADMIN']}>
+            {withSuspense(<DashboardSpaceNewPage />)}
+          </RoleGate>
+        ),
+      },
+      {
+        path: 'spaces/:slug/edit',
+        element: (
+          <RoleGate allow={['SPACE_OWNER', 'ADMIN']}>
+            {withSuspense(<DashboardSpaceEditPage />)}
+          </RoleGate>
+        ),
+      },
+      {
+        path: 'bookings',
+        element: (
+          <RoleGate allow={['SPACE_OWNER', 'ADMIN']}>
+            {withSuspense(<DashboardBookingsPage />)}
+          </RoleGate>
+        ),
+      },
+      {
+        path: 'applications',
+        element: (
+          <RoleGate allow={['ADMIN']}>
+            {withSuspense(<DashboardApplicationsPage />)}
+          </RoleGate>
+        ),
+      },
+      {
+        path: 'pages',
+        element: (
+          <RoleGate allow={['ADMIN']}>
+            {withSuspense(<DashboardPagesPage />)}
+          </RoleGate>
+        ),
+      },
+      {
+        path: 'media',
+        element: (
+          <RoleGate allow={['ADMIN']}>
+            {withSuspense(<DashboardMediaPage />)}
+          </RoleGate>
+        ),
+      },
       { path: 'settings', element: withSuspense(<DashboardSettingsPage />) },
     ],
   },

@@ -20,8 +20,8 @@ NestJS 10 + Prisma 5 + Postgres backend for the Qreative Spaces platform.
 # From the monorepo root:
 
 # 1. Start Postgres (Docker is easiest)
-docker run -d --name qspaces-db -p 5432:5432 \
-  -e POSTGRES_USER=qspaces -e POSTGRES_PASSWORD=qspaces -e POSTGRES_DB=qspaces \
+docker run -d --name spaces-db -p 5432:5432 \
+  -e POSTGRES_USER=spaces -e POSTGRES_PASSWORD=spaces -e POSTGRES_DB=spaces \
   postgres:16
 
 # 2. Copy env (defaults match the docker command above)
@@ -36,6 +36,24 @@ npm run dev:api
 # → http://localhost:4000/api
 # → http://localhost:4000/api/docs  (Swagger)
 ```
+
+<details>
+<summary>Windows / PowerShell equivalents</summary>
+
+PowerShell uses backtick (`` ` ``) for line continuation, not backslash. Replace steps 1 and 2 with:
+
+```powershell
+# 1. Postgres
+docker run -d --name spaces-db -p 5432:5432 `
+  -e POSTGRES_USER=spaces `
+  -e POSTGRES_PASSWORD=spaces `
+  -e POSTGRES_DB=spaces `
+  postgres:16
+
+# 2. Copy env
+Copy-Item apps/api/.env.example apps/api/.env
+```
+</details>
 
 ### Seeded credentials
 
@@ -204,11 +222,11 @@ fly auth login
 
 # 3. Claim the Fly app (does NOT deploy yet)
 cd c:/Code/source/repos/Spaces
-fly launch --no-deploy --copy-config --name qspaces-api --region jnb
+fly launch --no-deploy --copy-config --name spaces-api --region jnb
 
 # 4. Set secrets (these are encrypted, never leave Fly)
 fly secrets set \
-  DATABASE_URL="postgresql://...neon.tech/qspaces?sslmode=require" \
+  DATABASE_URL="postgresql://...neon.tech/spaces?sslmode=require" \
   JWT_SECRET="$(openssl rand -base64 48)" \
   CORS_ORIGINS="https://qreativespaces.co.ke,https://www.qreativespaces.co.ke"
 
@@ -218,7 +236,7 @@ fly secrets set \
   MPESA_CONSUMER_SECRET=... \
   MPESA_SHORTCODE=... \
   MPESA_PASSKEY=... \
-  MPESA_CALLBACK_URL=https://qspaces-api.fly.dev/api/payments/mpesa/callback
+  MPESA_CALLBACK_URL=https://spaces-api.fly.dev/api/payments/mpesa/callback
 ```
 
 ### Deploy
@@ -239,7 +257,7 @@ Migrations apply on every deploy automatically — safe to re-run.
 ```bash
 fly logs              # tail container output
 fly ssh console       # shell into the running machine
-curl https://qspaces-api.fly.dev/api/health
+curl https://spaces-api.fly.dev/api/health
 ```
 
 ### Seeding production (one-time)
@@ -254,7 +272,7 @@ fly ssh console -C "npm run prisma:seed --workspace apps/api"
 
 Daraja needs your callback URL pre-registered. Once you have your Fly app URL:
 
-1. Set `MPESA_CALLBACK_URL=https://qspaces-api.fly.dev/api/payments/mpesa/callback` via `fly secrets set`
+1. Set `MPESA_CALLBACK_URL=https://spaces-api.fly.dev/api/payments/mpesa/callback` via `fly secrets set`
 2. Update it in Safaricom's developer portal under your sandbox/production app
 
 ## What's still TODO before production

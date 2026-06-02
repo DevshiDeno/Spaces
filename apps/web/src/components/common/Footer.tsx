@@ -21,7 +21,7 @@ const linkGroups = [
       { label: 'Become an Ally', to: '/become-an-ally' },
       { label: 'Training Program', to: '/become-an-ally#training' },
       { label: 'Sign in', to: '/sign-in' },
-      { label: 'List your space', to: '/sign-up?owner=1' },
+      { label: 'List your space', to: '/become-an-ally' },
     ],
   },
   {

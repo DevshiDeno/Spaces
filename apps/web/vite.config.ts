@@ -2,6 +2,8 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
 
+process.env.BROWSER = 'msedge';
+
 export default defineConfig({
   plugins: [react()],
   resolve: {

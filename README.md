@@ -17,8 +17,8 @@
 npm install
 
 # 2. Spin up Postgres locally (any way you like — Docker is easiest):
-docker run -d --name qspaces-db -p 5432:5432 \
-  -e POSTGRES_USER=qspaces -e POSTGRES_PASSWORD=qspaces -e POSTGRES_DB=qspaces \
+docker run -d --name spaces-db -p 5432:5432 \
+  -e POSTGRES_USER=spaces -e POSTGRES_PASSWORD=spaces -e POSTGRES_DB=spaces \
   postgres:16
 
 # 3. Configure backend env
@@ -33,6 +33,24 @@ npm run db:seed
 npm run dev:api    # → http://localhost:4000/api
 npm run dev:web    # → http://localhost:5173
 ```
+
+<details>
+<summary>Windows / PowerShell equivalents</summary>
+
+PowerShell uses backtick (`` ` ``) for line continuation, not backslash. Replace step 2 and 3 with:
+
+```powershell
+# 2. Postgres
+docker run -d --name spaces-db -p 5432:5432 `
+  -e POSTGRES_USER=spaces `
+  -e POSTGRES_PASSWORD=spaces `
+  -e POSTGRES_DB=spaces `
+  postgres:16
+
+# 3. Backend env
+Copy-Item apps/api/.env.example apps/api/.env
+```
+</details>
 
 By default `apps/web/.env` has `VITE_USE_MOCK_API=true` so the frontend uses
 in-memory fixtures. Flip it to `false` to point at the real API on

@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -32,6 +32,14 @@ export class EventsController {
     return this.events.findBySlug(slug);
   }
 
+  @Get('rsvps/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Fetch a single RSVP (status polling)' })
+  rsvpById(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.events.findRsvpForUser(id, user.id);
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard)
   @Roles(UserRole.SPACE_OWNER, UserRole.ADMIN)
@@ -48,6 +56,6 @@ export class EventsController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: RsvpDto
   ) {
-    return this.events.rsvp(id, user.id, dto.attendees);
+    return this.events.rsvp(id, user.id, dto);
   }
 }

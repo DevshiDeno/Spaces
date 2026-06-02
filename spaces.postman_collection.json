@@ -1,0 +1,496 @@
+{
+  "info": {
+    "name": "Spaces API",
+    "description": "Inclusive venues platform — REST API. All routes are prefixed with `/api` (configurable via API_GLOBAL_PREFIX). Set `baseUrl` and run **Auth → Login** first; the test script stores the JWT in the `token` collection variable, which is sent as a Bearer header on every protected request.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "9c2b1f02-1c44-4d1e-a5f0-7c0c0d0b1f01"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000/api", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "venueId", "value": "", "type": "string" },
+    { "key": "venueSlug", "value": "", "type": "string" },
+    { "key": "eventId", "value": "", "type": "string" },
+    { "key": "eventSlug", "value": "", "type": "string" },
+    { "key": "bookingId", "value": "", "type": "string" },
+    { "key": "applicationId", "value": "", "type": "string" },
+    { "key": "userId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Simon Test\",\n  \"email\": \"simon+test@mzizi.co.ke\",\n  \"password\": \"demo1234\",\n  \"isSpaceOwner\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res && res.data && res.data.token) {",
+                  "  pm.collectionVariables.set('token', res.data.token);",
+                  "  if (res.data.user && res.data.user.id) pm.collectionVariables.set('userId', res.data.user.id);",
+                  "  pm.test('token captured', () => pm.expect(res.data.token).to.be.a('string'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"owner@qreativespaces.co.ke\",\n  \"password\": \"owner123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users (admin)",
+      "item": [
+        {
+          "name": "List users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users?page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "20" },
+                { "key": "search", "value": "", "disabled": true },
+                { "key": "role", "value": "USER", "description": "USER | SPACE_OWNER | ADMIN", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get user by id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["users", "{{userId}}"] }
+          }
+        },
+        {
+          "name": "Update user role",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/users/{{userId}}/role", "host": ["{{baseUrl}}"], "path": ["users", "{{userId}}", "role"] },
+            "body": { "mode": "raw", "raw": "{\n  \"role\": \"SPACE_OWNER\"\n}" }
+          }
+        },
+        {
+          "name": "Delete user",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["users", "{{userId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Venues",
+      "item": [
+        {
+          "name": "List venues (public)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/venues?page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["venues"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "20" },
+                { "key": "query", "value": "", "disabled": true },
+                { "key": "city", "value": "Nairobi", "disabled": true },
+                { "key": "type", "value": "", "disabled": true },
+                { "key": "mood", "value": "", "disabled": true },
+                { "key": "timeOfDay", "value": "", "disabled": true },
+                { "key": "noiseLevel", "value": "QUIET", "description": "QUIET | MODERATE | LIVELY", "disabled": true },
+                { "key": "capacityMin", "value": "10", "disabled": true },
+                { "key": "capacityMax", "value": "200", "disabled": true },
+                { "key": "priceMin", "value": "0", "disabled": true },
+                { "key": "priceMax", "value": "5000", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Featured venues (public)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/venues/featured", "host": ["{{baseUrl}}"], "path": ["venues", "featured"] }
+          }
+        },
+        {
+          "name": "My venues (owner)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/venues/owner", "host": ["{{baseUrl}}"], "path": ["venues", "owner"] }
+          }
+        },
+        {
+          "name": "Venue by slug (public)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/venues/slug/{{venueSlug}}", "host": ["{{baseUrl}}"], "path": ["venues", "slug", "{{venueSlug}}"] }
+          }
+        },
+        {
+          "name": "Create venue (owner/admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res && res.data && res.data.id) pm.collectionVariables.set('venueId', res.data.id);",
+                  "if (res && res.data && res.data.slug) pm.collectionVariables.set('venueSlug', res.data.slug);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/venues", "host": ["{{baseUrl}}"], "path": ["venues"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sunset Loft\",\n  \"tagline\": \"Rooftop studio with skyline views\",\n  \"description\": \"A bright rooftop loft with floor-to-ceiling windows, suited to small workshops and intimate events.\",\n  \"type\": \"studio\",\n  \"city\": \"Nairobi\",\n  \"address\": \"12 Kilimani Lane\",\n  \"capacity\": 40,\n  \"pricePerHour\": 2500,\n  \"bookingFee\": 500,\n  \"coverImage\": \"https://pub-xxxx.r2.dev/venues/cover.jpg\",\n  \"images\": [],\n  \"amenities\": [\"wifi\", \"projector\"],\n  \"moods\": [\"calm\", \"creative\"],\n  \"bestFor\": [\"workshops\", \"shoots\"],\n  \"noiseLevel\": \"MODERATE\",\n  \"timeOfDay\": [\"morning\", \"afternoon\"],\n  \"isPublished\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "Update venue",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/venues/{{venueId}}", "host": ["{{baseUrl}}"], "path": ["venues", "{{venueId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tagline\": \"Updated tagline\",\n  \"isPublished\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Add images to venue",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/venues/{{venueId}}/images", "host": ["{{baseUrl}}"], "path": ["venues", "{{venueId}}", "images"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"urls\": [\n    \"https://pub-xxxx.r2.dev/venues/abc/image-1.jpg\",\n    \"https://pub-xxxx.r2.dev/venues/abc/image-2.jpg\"\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete venue",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/venues/{{venueId}}", "host": ["{{baseUrl}}"], "path": ["venues", "{{venueId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "List events (public)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/events", "host": ["{{baseUrl}}"], "path": ["events"] }
+          }
+        },
+        {
+          "name": "Featured events (public)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/events/featured", "host": ["{{baseUrl}}"], "path": ["events", "featured"] }
+          }
+        },
+        {
+          "name": "Event by slug (public)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/events/slug/{{eventSlug}}", "host": ["{{baseUrl}}"], "path": ["events", "slug", "{{eventSlug}}"] }
+          }
+        },
+        {
+          "name": "Create event (owner/admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res && res.data && res.data.id) pm.collectionVariables.set('eventId', res.data.id);",
+                  "if (res && res.data && res.data.slug) pm.collectionVariables.set('eventSlug', res.data.slug);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/events", "host": ["{{baseUrl}}"], "path": ["events"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Acoustic Night\",\n  \"category\": \"music\",\n  \"description\": \"An intimate acoustic showcase featuring local songwriters.\",\n  \"startDate\": \"2026-07-12T18:00:00.000Z\",\n  \"endDate\": \"2026-07-12T22:00:00.000Z\",\n  \"city\": \"Nairobi\",\n  \"venueId\": \"{{venueId}}\",\n  \"pricePerTicket\": 1000,\n  \"ticketsAvailable\": 80,\n  \"coverImage\": \"https://pub-xxxx.r2.dev/events/acoustic.jpg\",\n  \"isFeatured\": false,\n  \"organizer\": \"Spaces\"\n}"
+            }
+          }
+        },
+        {
+          "name": "RSVP to event",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/events/{{eventId}}/rsvp", "host": ["{{baseUrl}}"], "path": ["events", "{{eventId}}", "rsvp"] },
+            "body": { "mode": "raw", "raw": "{\n  \"attendees\": 2\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Create booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res && res.data && res.data.id) pm.collectionVariables.set('bookingId', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/bookings", "host": ["{{baseUrl}}"], "path": ["bookings"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venueId\": \"{{venueId}}\",\n  \"date\": \"2026-06-14\",\n  \"startTime\": \"17:00\",\n  \"endTime\": \"22:00\",\n  \"guestCount\": 25,\n  \"totalAmount\": 12500,\n  \"paymentMethod\": \"MPESA\",\n  \"specialRequests\": \"Need extra chairs and a projector\",\n  \"phone\": \"254712345678\"\n}"
+            }
+          }
+        },
+        {
+          "name": "My bookings",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/bookings", "host": ["{{baseUrl}}"], "path": ["bookings"] }
+          }
+        },
+        {
+          "name": "Owner bookings",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/bookings/owner", "host": ["{{baseUrl}}"], "path": ["bookings", "owner"] }
+          }
+        },
+        {
+          "name": "Get booking by id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/bookings/{{bookingId}}", "host": ["{{baseUrl}}"], "path": ["bookings", "{{bookingId}}"] }
+          }
+        },
+        {
+          "name": "Cancel booking",
+          "request": {
+            "method": "PATCH",
+            "url": { "raw": "{{baseUrl}}/bookings/{{bookingId}}/cancel", "host": ["{{baseUrl}}"], "path": ["bookings", "{{bookingId}}", "cancel"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Applications",
+      "item": [
+        {
+          "name": "Submit application (public)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res && res.data && res.data.id) pm.collectionVariables.set('applicationId', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/applications", "host": ["{{baseUrl}}"], "path": ["applications"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"Mzizi Hub\",\n  \"ownerName\": \"Simon Mzizi\",\n  \"email\": \"simon@mzizi.co.ke\",\n  \"phone\": \"254712345678\",\n  \"city\": \"Nairobi\",\n  \"address\": \"5 Riverside Drive\",\n  \"venueType\": \"co-working\",\n  \"description\": \"A community-oriented hub for creators and makers across Nairobi.\",\n  \"motivation\": \"We want to extend our space to underrepresented artists and host inclusive events.\",\n  \"inclusivityPlan\": \"Wheelchair access, sliding-scale pricing for emerging artists, and gender-neutral facilities.\",\n  \"experience\": \"Three years of operating a co-working space.\",\n  \"agreesToTerms\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "List applications (admin)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/applications?status=PENDING",
+              "host": ["{{baseUrl}}"],
+              "path": ["applications"],
+              "query": [
+                { "key": "status", "value": "PENDING", "description": "PENDING | APPROVED | REJECTED" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Review application (admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/applications/{{applicationId}}/review", "host": ["{{baseUrl}}"], "path": ["applications", "{{applicationId}}", "review"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\",\n  \"notes\": \"Great inclusivity plan — welcome aboard.\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Contact",
+      "item": [
+        {
+          "name": "Submit contact message (public)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/contact", "host": ["{{baseUrl}}"], "path": ["contact"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Curious Visitor\",\n  \"email\": \"hello@example.com\",\n  \"subject\": \"Partnership inquiry\",\n  \"message\": \"We would love to collaborate on a community event next month.\",\n  \"isVenueInquiry\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "List contact messages (admin)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/contact", "host": ["{{baseUrl}}"], "path": ["contact"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Stats (admin/owner)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/dashboard/stats", "host": ["{{baseUrl}}"], "path": ["dashboard", "stats"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "M-Pesa callback (webhook)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/payments/mpesa/callback", "host": ["{{baseUrl}}"], "path": ["payments", "mpesa", "callback"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Body\": {\n    \"stkCallback\": {\n      \"MerchantRequestID\": \"abc-123\",\n      \"CheckoutRequestID\": \"ws_CO_000000\",\n      \"ResultCode\": 0,\n      \"ResultDesc\": \"The service request is processed successfully.\",\n      \"CallbackMetadata\": {\n        \"Item\": [\n          { \"Name\": \"Amount\", \"Value\": 12500 },\n          { \"Name\": \"MpesaReceiptNumber\", \"Value\": \"NLJ7RT61SV\" },\n          { \"Name\": \"PhoneNumber\", \"Value\": 254712345678 }\n        ]\n      }\n    }\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Uploads",
+      "item": [
+        {
+          "name": "Create presigned upload URL (R2)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/uploads/presigned-url", "host": ["{{baseUrl}}"], "path": ["uploads", "presigned-url"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contentType\": \"image/jpeg\",\n  \"folder\": \"venues/{{venueId}}\"\n}"
+            },
+            "description": "Returns `{ uploadUrl, publicUrl, key, expiresIn }`. Use `uploadUrl` to PUT the file directly to R2 from the browser; persist `publicUrl` on the resource."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health check (public)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+          }
+        }
+      ]
+    }
+  ]
+}

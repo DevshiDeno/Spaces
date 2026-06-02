@@ -1,4 +1,4 @@
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -14,30 +14,21 @@ const schema = z.object({
   name: z.string().min(2, 'Please enter your name'),
   email: z.string().email('Please enter a valid email'),
   password: z.string().min(6, 'Must be at least 6 characters'),
-  isSpaceOwner: z.boolean().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
 
 export default function SignUpPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const setSession = useAuthStore((s) => s.setSession);
   const toast = useToast();
   const [showPassword, setShowPassword] = useState(false);
-  const isOwnerFlow = searchParams.get('owner') === '1';
 
   const {
     register,
     handleSubmit,
-    setValue,
-    watch,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: { isSpaceOwner: isOwnerFlow },
-  });
-  const isSpaceOwner = watch('isSpaceOwner');
+  } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   async function onSubmit(values: FormValues) {
     try {
@@ -90,31 +81,6 @@ export default function SignUpPage() {
           {...register('password')}
         />
 
-        <div>
-          <p className="mb-2 text-sm font-medium">Are you a space owner?</p>
-          <p className="mb-3 text-xs text-muted-foreground">You can also do this later from your profile.</p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => setValue('isSpaceOwner', true)}
-              className={`rounded-lg border p-3 text-left text-sm transition ${
-                isSpaceOwner ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-border'
-              }`}
-            >
-              Yes, I want to list my space
-            </button>
-            <button
-              type="button"
-              onClick={() => setValue('isSpaceOwner', false)}
-              className={`rounded-lg border p-3 text-left text-sm transition ${
-                !isSpaceOwner ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-border'
-              }`}
-            >
-              No, just book spaces for now
-            </button>
-          </div>
-        </div>
-
         <Button type="submit" fullWidth size="lg" isLoading={isSubmitting}>
           Create Account
         </Button>
@@ -126,6 +92,14 @@ export default function SignUpPage() {
           Sign in
         </Link>
       </p>
+
+      <div className="mt-4 rounded-lg border border-border bg-muted/40 p-3 text-center text-xs text-muted-foreground">
+        Want to list a venue?{' '}
+        <Link to="/become-an-ally" className="font-medium text-primary hover:underline">
+          Apply to become an ally
+        </Link>
+        . We'll review your application and send you a login invite.
+      </div>
     </>
   );
 }
