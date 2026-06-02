@@ -56,20 +56,25 @@ enum ApplicationStatus {
 // ─────────────────────────────────────────────────────────────────────────────
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  passwordHash  String
-  name          String
-  avatarUrl     String?
-  role          UserRole @default(USER)
-  isSpaceOwner  Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  passwordHash         String?
+  name                 String
+  avatarUrl            String?
+  role                 UserRole  @default(USER)
+  isSpaceOwner         Boolean   @default(false)
+  inviteToken            String?   @unique
+  inviteTokenExpiresAt   DateTime?
+  passwordResetToken     String?   @unique
+  passwordResetExpiresAt DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
 
-  venues       Venue[]
-  bookings     Booking[]
-  rsvps        Rsvp[]
-  reviewedApps AllyApplication[] @relation("ReviewedApplications")
+  venues              Venue[]
+  bookings            Booking[]
+  rsvps               Rsvp[]
+  reviewedApps        AllyApplication[] @relation("ReviewedApplications")
+  applicationsClaimed AllyApplication[] @relation("ApplicationOwner")
 
   @@index([email])
 }
@@ -159,13 +164,19 @@ model Booking {
   @@index([userId])
   @@index([venueId])
   @@index([date])
+  @@index([paymentRef])
 }
 
 model Rsvp {
-  id         String   @id @default(cuid())
-  attendees  Int
-  reference  String   @unique
-  createdAt  DateTime @default(now())
+  id            String         @id @default(cuid())
+  attendees     Int
+  reference     String         @unique
+  totalAmount   Int            @default(0)
+  paymentMethod PaymentMethod?
+  paymentStatus PaymentStatus?
+  paymentRef    String?
+  phone         String?
+  createdAt     DateTime       @default(now())
 
   eventId String
   event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -173,6 +184,7 @@ model Rsvp {
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([eventId, userId])
+  @@index([paymentRef])
 }
 
 model AllyApplication {
@@ -196,8 +208,12 @@ model AllyApplication {
   reviewedById String?
   reviewedBy   User?   @relation("ReviewedApplications", fields: [reviewedById], references: [id], onDelete: SetNull)
 
+  userId String?
+  user   User?   @relation("ApplicationOwner", fields: [userId], references: [id], onDelete: SetNull)
+
   @@index([status])
   @@index([email])
+  @@index([userId])
 }
 
 model ContactMessage {

@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(if \\(-not \\(Test-Path \"apps/web\"\\)\\) { New-Item -ItemType Directory -Path \"apps/web\" -Force | Out-Null }; $items = @\\('src','public','index.html','vite.config.ts','tsconfig.json','tsconfig.app.json','tsconfig.node.json','tailwind.config.js','postcss.config.js','package.json','package-lock.json','.env','.env.example','README.md','node_modules'\\); foreach \\($i in $items\\) { if \\(Test-Path $i\\) { Move-Item -Path $i -Destination \"apps/web/\" -Force -ErrorAction Continue } }; if \\(Test-Path 'dist'\\) { Remove-Item -Recurse -Force 'dist' }; Get-ChildItem -Force | Format-Table Mode,Name -AutoSize)"
+      "PowerShell(if \\(-not \\(Test-Path \"apps/web\"\\)\\) { New-Item -ItemType Directory -Path \"apps/web\" -Force | Out-Null }; $items = @\\('src','public','index.html','vite.config.ts','tsconfig.json','tsconfig.app.json','tsconfig.node.json','tailwind.config.js','postcss.config.js','package.json','package-lock.json','.env','.env.example','README.md','node_modules'\\); foreach \\($i in $items\\) { if \\(Test-Path $i\\) { Move-Item -Path $i -Destination \"apps/web/\" -Force -ErrorAction Continue } }; if \\(Test-Path 'dist'\\) { Remove-Item -Recurse -Force 'dist' }; Get-ChildItem -Force | Format-Table Mode,Name -AutoSize)",
+      "Bash(npm run *)",
+      "Bash(curl -s \"https://spaces-api.fly.dev/api/venues/featured\")",
+      "Bash(git -C \"c:/Code/source/repos/Spaces\" diff apps/web/src/hooks/useVenues.ts apps/web/src/services/venues.service.ts)",
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" http://localhost:4000/api/events/featured)"
     ]
   }
 }

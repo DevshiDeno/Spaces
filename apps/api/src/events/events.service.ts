@@ -1,11 +1,23 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
+import { PaymentsService } from '@/payments/payments.service';
+import { MailService } from '@/mail/mail.service';
 import { slugify } from '@/common/utils/slug';
 import { CreateEventDto } from './dto/create-event.dto';
+import { RsvpDto } from './dto/rsvp.dto';
 
 @Injectable()
 export class EventsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly payments: PaymentsService,
+    private readonly mail: MailService
+  ) {}
 
   list() {
     return this.prisma.event.findMany({
@@ -32,27 +44,147 @@ export class EventsService {
     return this.prisma.event.create({ data: { ...dto, slug } });
   }
 
-  async rsvp(eventId: string, userId: string, attendees: number) {
+  async rsvp(eventId: string, userId: string, dto: RsvpDto) {
     const event = await this.prisma.event.findUnique({ where: { id: eventId } });
     if (!event) throw new NotFoundException('Event not found');
-    const remaining = event.ticketsAvailable - event.ticketsSold;
-    if (attendees > remaining) {
-      throw new BadRequestException(`Only ${remaining} tickets remaining`);
+
+    const isPaid = event.pricePerTicket > 0;
+    const totalAmount = isPaid ? event.pricePerTicket * dto.attendees : 0;
+
+    if (isPaid) {
+      if (!dto.paymentMethod) {
+        throw new BadRequestException('Payment method is required for paid events');
+      }
+      if (dto.paymentMethod === 'MPESA' && !dto.phone) {
+        throw new BadRequestException('Phone number is required for M-Pesa payments');
+      }
+    }
+
+    // Re-RSVPing changes ticket count by a delta, not the full new count.
+    // Atomically check + claim only that delta against the published cap.
+    const existing = await this.prisma.rsvp.findUnique({
+      where: { eventId_userId: { eventId, userId } },
+    });
+    const previousAttendees = existing?.attendees ?? 0;
+    const delta = dto.attendees - previousAttendees;
+
+    if (delta > 0) {
+      // Conditional update — succeeds only if there's room. updateMany returns
+      // count=0 when the WHERE doesn't match, which is our oversell guard.
+      const claim = await this.prisma.event.updateMany({
+        where: {
+          id: eventId,
+          ticketsSold: { lte: event.ticketsAvailable - delta },
+        },
+        data: { ticketsSold: { increment: delta } },
+      });
+      if (claim.count === 0) {
+        const remaining = event.ticketsAvailable - event.ticketsSold;
+        throw new BadRequestException(
+          remaining > 0
+            ? `Only ${remaining} tickets remaining`
+            : 'Sold out'
+        );
+      }
+    } else if (delta < 0) {
+      // Releasing tickets back. No payment refund is issued here.
+      await this.prisma.event.update({
+        where: { id: eventId },
+        data: { ticketsSold: { increment: delta } },
+      });
     }
 
     const reference = `RSVP-${event.id}-${Date.now()}`;
-    const [, rsvp] = await this.prisma.$transaction([
-      this.prisma.event.update({
-        where: { id: eventId },
-        data: { ticketsSold: { increment: attendees } },
-      }),
-      this.prisma.rsvp.upsert({
-        where: { eventId_userId: { eventId, userId } },
-        update: { attendees, reference },
-        create: { eventId, userId, attendees, reference },
-      }),
-    ]);
-    return { ok: true as const, reference: rsvp.reference };
+    const rsvp = await this.prisma.rsvp.upsert({
+      where: { eventId_userId: { eventId, userId } },
+      update: {
+        attendees: dto.attendees,
+        reference,
+        totalAmount,
+        paymentMethod: isPaid ? dto.paymentMethod ?? null : null,
+        paymentStatus: isPaid ? 'PENDING' : null,
+        paymentRef: null,
+        phone: dto.phone ?? null,
+      },
+      create: {
+        eventId,
+        userId,
+        attendees: dto.attendees,
+        reference,
+        totalAmount,
+        paymentMethod: isPaid ? dto.paymentMethod ?? null : null,
+        paymentStatus: isPaid ? 'PENDING' : null,
+        phone: dto.phone ?? null,
+      },
+    });
+
+    if (!isPaid) {
+      void this.sendRsvpConfirmation(rsvp.id, event.title);
+      return { ok: true as const, reference: rsvp.reference, rsvp };
+    }
+
+    const payment = await this.payments.initiate({
+      accountReference: rsvp.id,
+      description: 'Event RSVP',
+      amount: totalAmount,
+      method: dto.paymentMethod!,
+      phone: dto.phone,
+    });
+
+    // Synchronous failure: release the tickets we just claimed, atomically.
+    if (payment.status === 'FAILED') {
+      const [, updated] = await this.prisma.$transaction([
+        this.prisma.event.update({
+          where: { id: eventId },
+          data: { ticketsSold: { decrement: dto.attendees } },
+        }),
+        this.prisma.rsvp.update({
+          where: { id: rsvp.id },
+          data: { paymentStatus: 'FAILED', paymentRef: payment.reference },
+        }),
+      ]);
+      return { ok: true as const, reference: updated.reference, rsvp: updated };
+    }
+
+    const updated = await this.prisma.rsvp.update({
+      where: { id: rsvp.id },
+      data: {
+        paymentStatus: payment.status,
+        paymentRef: payment.reference,
+      },
+    });
+
+    if (payment.status === 'SUCCEEDED') {
+      void this.sendRsvpConfirmation(updated.id, event.title);
+    }
+
+    return { ok: true as const, reference: updated.reference, rsvp: updated };
+  }
+
+  /** Fetches the user + rsvp + event together and fires a confirmation email. */
+  private async sendRsvpConfirmation(rsvpId: string, eventTitle: string) {
+    const full = await this.prisma.rsvp.findUnique({
+      where: { id: rsvpId },
+      include: { user: { select: { name: true, email: true } } },
+    });
+    if (!full) return;
+    await this.mail.sendRsvpConfirmation({
+      to: full.user.email,
+      name: full.user.name,
+      eventTitle,
+      attendees: full.attendees,
+      totalAmountKES: full.totalAmount,
+      reference: full.reference,
+    });
+  }
+
+  async findRsvpForUser(rsvpId: string, userId: string) {
+    const rsvp = await this.prisma.rsvp.findUnique({ where: { id: rsvpId } });
+    if (!rsvp) throw new NotFoundException('RSVP not found');
+    if (rsvp.userId !== userId) {
+      throw new ForbiddenException('You cannot view this RSVP');
+    }
+    return rsvp;
   }
 
   private async uniqueSlug(title: string): Promise<string> {

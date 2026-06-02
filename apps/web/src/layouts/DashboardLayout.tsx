@@ -16,22 +16,36 @@ import { Logo } from '@/components/ui/Logo';
 import { Button } from '@/components/ui/Button';
 import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { useAuthStore } from '@/store/auth.store';
+import { hasDashboardRole, type DashboardRole } from '@/routes/RoleGate';
 import { cn } from '@/utils/cn';
 
-const navLinks = [
-  { to: '/dashboard', label: 'Overview', icon: LayoutDashboard, end: true },
-  { to: '/dashboard/spaces', label: 'Spaces', icon: Building2 },
-  { to: '/dashboard/bookings', label: 'Bookings', icon: CalendarDays },
-  { to: '/dashboard/applications', label: 'Applications', icon: Users },
-  { to: '/dashboard/pages', label: 'Pages', icon: FileText },
-  { to: '/dashboard/media', label: 'Media Library', icon: ImageIcon },
-  { to: '/dashboard/settings', label: 'Settings', icon: Settings },
+interface NavLinkSpec {
+  to: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  end?: boolean;
+  allow: DashboardRole[];
+}
+
+const ALL: DashboardRole[] = ['USER', 'SPACE_OWNER', 'ADMIN'];
+const OWNER: DashboardRole[] = ['SPACE_OWNER', 'ADMIN'];
+const ADMIN: DashboardRole[] = ['ADMIN'];
+
+const navLinks: NavLinkSpec[] = [
+  { to: '/dashboard', label: 'Overview', icon: LayoutDashboard, end: true, allow: ALL },
+  { to: '/dashboard/spaces', label: 'Spaces', icon: Building2, allow: OWNER },
+  { to: '/dashboard/bookings', label: 'Bookings', icon: CalendarDays, allow: OWNER },
+  { to: '/dashboard/applications', label: 'Applications', icon: Users, allow: ADMIN },
+  { to: '/dashboard/pages', label: 'Pages', icon: FileText, allow: ADMIN },
+  { to: '/dashboard/media', label: 'Media Library', icon: ImageIcon, allow: ADMIN },
+  { to: '/dashboard/settings', label: 'Settings', icon: Settings, allow: ALL },
 ];
 
 export function DashboardLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const visibleLinks = navLinks.filter((link) => hasDashboardRole(user?.role, link.allow));
 
   return (
     <div className="flex min-h-screen bg-muted/30">
@@ -52,7 +66,7 @@ export function DashboardLayout() {
           </button>
         </div>
         <nav className="flex flex-col gap-1 p-4">
-          {navLinks.map((link) => {
+          {visibleLinks.map((link) => {
             const Icon = link.icon;
             return (
               <NavLink

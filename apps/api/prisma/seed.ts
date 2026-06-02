@@ -7,6 +7,17 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding database…');
 
+  // Hard refuse to seed weak demo passwords into prod.
+  const isProd = process.env.NODE_ENV === 'production';
+  if (isProd && process.env.ALLOW_PROD_SEED !== 'true') {
+    console.error(
+      '❌ Refusing to run the dev seed in production. It creates accounts with weak demo passwords ' +
+        '(admin123 / owner123 / demo1234). If you really need to seed prod, set ALLOW_PROD_SEED=true ' +
+        'AND replace the passwords first.'
+    );
+    process.exit(1);
+  }
+
   // Admin user
   const passwordHash = await bcrypt.hash('admin123', 12);
   const admin = await prisma.user.upsert({
@@ -63,8 +74,12 @@ async function main() {
       bookingFee: 1500,
       rating: 4.8,
       reviewCount: 124,
-      coverImage: '/images/venue-1.jpg',
-      images: ['/images/venue-1.jpg', '/images/venue-2.jpg', '/images/venue-3.jpg'],
+      coverImage: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=1600&q=80',
+      images: [
+        'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=1600&q=80',
+        'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1600&q=80',
+        'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=1600&q=80',
+      ],
       amenities: ['Sound System', 'Lighting', 'Bar', 'Wheelchair Accessible', 'Gender-neutral restrooms'],
       moods: ['Energetic', 'Creative'],
       bestFor: ['Listening parties', 'Brand launches', 'Cocktail parties'],
@@ -86,8 +101,12 @@ async function main() {
       bookingFee: 1200,
       rating: 4.9,
       reviewCount: 87,
-      coverImage: '/images/venue-2.jpg',
-      images: ['/images/venue-2.jpg', '/images/venue-1.jpg', '/images/venue-3.jpg'],
+      coverImage: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1600&q=80',
+      images: [
+        'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1600&q=80',
+        'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600&q=80',
+        'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1600&q=80',
+      ],
       amenities: ['Garden seating', 'Catering kitchen', 'Parking', 'Power backup'],
       moods: ['Relaxed', 'Intimate'],
       bestFor: ['Breathwork sessions', 'Private dinners', 'Wellness circles'],
@@ -109,8 +128,12 @@ async function main() {
       bookingFee: 1000,
       rating: 4.7,
       reviewCount: 52,
-      coverImage: '/images/venue-3.jpg',
-      images: ['/images/venue-3.jpg', '/images/venue-1.jpg', '/images/venue-2.jpg'],
+      coverImage: 'https://images.unsplash.com/photo-1604014237800-1c9102c219da?w=1600&q=80',
+      images: [
+        'https://images.unsplash.com/photo-1604014237800-1c9102c219da?w=1600&q=80',
+        'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=1600&q=80',
+        'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=1600&q=80',
+      ],
       amenities: ['Cyclorama', 'Continuous lighting', 'Dressing room', 'Loading bay'],
       moods: ['Creative'],
       bestFor: ['Photoshoots', 'Lookbook shoots', 'Podcast recordings'],
@@ -123,7 +146,7 @@ async function main() {
   for (const v of venues) {
     await prisma.venue.upsert({
       where: { slug: v.slug },
-      update: {},
+      update: { coverImage: v.coverImage, images: v.images },
       create: { ...v, ownerId: owner.id },
     });
   }
@@ -146,7 +169,7 @@ async function main() {
       pricePerTicket: 4500,
       ticketsAvailable: 40,
       ticketsSold: 28,
-      coverImage: '/images/venue-2.jpg',
+      coverImage: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1600&q=80',
       isFeatured: true,
       organizer: 'Qreative Kitchen Collective',
     },
@@ -162,7 +185,7 @@ async function main() {
       pricePerTicket: 2000,
       ticketsAvailable: 180,
       ticketsSold: 142,
-      coverImage: '/images/venue-1.jpg',
+      coverImage: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1600&q=80',
       isFeatured: true,
       organizer: 'Qreative Sound',
     },
@@ -171,7 +194,7 @@ async function main() {
   for (const e of events) {
     await prisma.event.upsert({
       where: { slug: e.slug },
-      update: {},
+      update: { coverImage: e.coverImage },
       create: e,
     });
   }

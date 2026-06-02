@@ -38,6 +38,7 @@ export interface Venue {
   noiseLevel: NoiseLevel;
   timeOfDay: TimeOfDay[];
   isVerified: boolean;
+  isPublished?: boolean;
   bookingFee: number;
   ownerId: ID;
   createdAt: string;
@@ -85,21 +86,38 @@ export interface AppEvent {
   organizer: string;
 }
 
-export type PaymentMethod = 'mpesa' | 'card';
+export type PaymentMethod = 'MPESA' | 'CARD';
+export type PaymentStatus = 'PENDING' | 'SUCCEEDED' | 'FAILED';
 
 export interface Booking {
   id: ID;
   venueId: ID;
-  venueName: string;
+  venueName?: string;
   userId: ID;
   date: string;
   startTime: string;
   endTime: string;
   guestCount: number;
   totalAmount: number;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
   paymentMethod: PaymentMethod;
+  paymentStatus?: PaymentStatus;
+  paymentRef?: string;
   specialRequests?: string;
+  createdAt: string;
+}
+
+export interface Rsvp {
+  id: ID;
+  eventId: ID;
+  userId: ID;
+  attendees: number;
+  reference: string;
+  totalAmount: number;
+  paymentMethod?: PaymentMethod | null;
+  paymentStatus?: PaymentStatus | null;
+  paymentRef?: string | null;
+  phone?: string | null;
   createdAt: string;
 }
 

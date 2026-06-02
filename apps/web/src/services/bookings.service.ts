@@ -7,7 +7,8 @@ export interface BookingPayload {
   startTime: string;
   endTime: string;
   guestCount: number;
-  paymentMethod: 'mpesa' | 'card';
+  paymentMethod: 'MPESA' | 'CARD';
+  phone?: string;
   specialRequests?: string;
   totalAmount: number;
 }
@@ -15,6 +16,21 @@ export interface BookingPayload {
 export const bookingsService = {
   async create(payload: BookingPayload): Promise<Booking> {
     const { data } = await http.post<Booking>('/bookings', payload);
+    return data;
+  },
+
+  async getById(id: string): Promise<Booking> {
+    const { data } = await http.get<Booking>(`/bookings/${id}`);
+    return data;
+  },
+
+  async listMine(): Promise<Booking[]> {
+    const { data } = await http.get<Booking[]>('/bookings');
+    return data;
+  },
+
+  async listForOwner(): Promise<Booking[]> {
+    const { data } = await http.get<Booking[]>('/bookings/owner');
     return data;
   },
 };

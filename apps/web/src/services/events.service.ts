@@ -1,5 +1,17 @@
 import { http } from './http';
-import type { AppEvent } from '@/types';
+import type { AppEvent, Rsvp } from '@/types';
+
+export interface RsvpPayload {
+  attendees: number;
+  paymentMethod?: 'MPESA' | 'CARD';
+  phone?: string;
+}
+
+export interface RsvpResponse {
+  ok: true;
+  reference: string;
+  rsvp: Rsvp;
+}
 
 export const eventsService = {
   async list(): Promise<AppEvent[]> {
@@ -17,11 +29,13 @@ export const eventsService = {
     return data;
   },
 
-  async rsvp(eventId: string, attendees: number): Promise<{ ok: true; reference: string }> {
-    const { data } = await http.post<{ ok: true; reference: string }>(
-      `/events/${eventId}/rsvp`,
-      { attendees }
-    );
+  async rsvp(eventId: string, payload: RsvpPayload): Promise<RsvpResponse> {
+    const { data } = await http.post<RsvpResponse>(`/events/${eventId}/rsvp`, payload);
+    return data;
+  },
+
+  async getRsvp(rsvpId: string): Promise<Rsvp> {
+    const { data } = await http.get<Rsvp>(`/events/rsvps/${rsvpId}`);
     return data;
   },
 };

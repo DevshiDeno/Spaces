@@ -1,9 +1,64 @@
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Switch } from '@/components/ui/Switch';
+import { Button } from '@/components/ui/Button';
 import { useThemeStore } from '@/store/theme.store';
+import { useToast } from '@/hooks/useToast';
+
+interface NotificationPrefs {
+  bookingConfirmations: boolean;
+  newAllyApplications: boolean;
+  weeklyDigest: boolean;
+}
+
+const DEFAULT_PREFS: NotificationPrefs = {
+  bookingConfirmations: true,
+  newAllyApplications: true,
+  weeklyDigest: true,
+};
+
+const STORAGE_KEY = 'qs-notification-prefs';
+
+function loadPrefs(): NotificationPrefs {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return DEFAULT_PREFS;
+    return { ...DEFAULT_PREFS, ...JSON.parse(raw) };
+  } catch {
+    return DEFAULT_PREFS;
+  }
+}
 
 export default function DashboardSettingsPage() {
   const { theme, toggleTheme } = useThemeStore();
+  const toast = useToast();
+  const [prefs, setPrefs] = useState<NotificationPrefs>(DEFAULT_PREFS);
+  const [dirty, setDirty] = useState(false);
+
+  useEffect(() => {
+    setPrefs(loadPrefs());
+  }, []);
+
+  function update<K extends keyof NotificationPrefs>(key: K, value: NotificationPrefs[K]) {
+    setPrefs((p) => ({ ...p, [key]: value }));
+    setDirty(true);
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+      setDirty(false);
+      toast.success('Preferences saved');
+    } catch {
+      toast.error('Could not save preferences');
+    }
+  }
+
+  const rows: Array<{ key: keyof NotificationPrefs; label: string }> = [
+    { key: 'bookingConfirmations', label: 'Booking confirmations' },
+    { key: 'newAllyApplications', label: 'New ally applications' },
+    { key: 'weeklyDigest', label: 'Weekly performance digest' },
+  ];
 
   return (
     <div className="space-y-6">
@@ -35,12 +90,20 @@ export default function DashboardSettingsPage() {
             <CardDescription>Decide what we should email you about.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {['Booking confirmations', 'New ally applications', 'Weekly performance digest'].map((label) => (
-              <div key={label} className="flex items-center justify-between rounded-lg border border-border p-4">
+            {rows.map(({ key, label }) => (
+              <div key={key} className="flex items-center justify-between rounded-lg border border-border p-4">
                 <p className="text-sm font-medium">{label}</p>
-                <Switch defaultChecked />
+                <Switch
+                  checked={prefs[key]}
+                  onChange={(e) => update(key, e.target.checked)}
+                />
               </div>
             ))}
+            <div className="flex justify-end pt-2">
+              <Button size="sm" onClick={save} disabled={!dirty}>
+                Save changes
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

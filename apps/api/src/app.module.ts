@@ -14,6 +14,8 @@ import { ContactModule } from './contact/contact.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { PaymentsModule } from './payments/payments.module';
 import { HealthModule } from './health/health.module';
+import { UploadsModule } from './uploads/uploads.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import { HealthModule } from './health/health.module';
     DashboardModule,
     PaymentsModule,
     HealthModule,
+    UploadsModule,
+    MailModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

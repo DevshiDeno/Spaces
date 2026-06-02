@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { useToast } from '@/hooks/useToast';
 
 interface Page {
   id: string;
@@ -22,9 +23,13 @@ const mockPages: Page[] = [
 
 export default function DashboardPagesPage() {
   const [query, setQuery] = useState('');
+  const toast = useToast();
   const filtered = mockPages.filter((p) =>
     `${p.title} ${p.slug}`.toLowerCase().includes(query.toLowerCase())
   );
+
+  const comingSoon = (feature: string) =>
+    toast.info(`${feature} coming soon`, 'This flow is not yet built.');
 
   return (
     <div className="space-y-6">
@@ -33,7 +38,12 @@ export default function DashboardPagesPage() {
           <h1 className="heading-display text-3xl font-bold tracking-tight">Pages</h1>
           <p className="mt-1 text-sm text-muted-foreground">Manage CMS pages for your public site.</p>
         </div>
-        <Button leftIcon={<Plus className="h-4 w-4" />}>Create New Page</Button>
+        <Button
+          leftIcon={<Plus className="h-4 w-4" />}
+          onClick={() => comingSoon('Page creation')}
+        >
+          Create New Page
+        </Button>
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-4">
@@ -71,7 +81,13 @@ export default function DashboardPagesPage() {
                   </td>
                   <td className="p-4 text-muted-foreground">Updated {p.updatedAt}</td>
                   <td className="p-4 text-right">
-                    <Button size="sm" variant="ghost">Edit</Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => comingSoon('Page editing')}
+                    >
+                      Edit
+                    </Button>
                   </td>
                 </tr>
               ))}
