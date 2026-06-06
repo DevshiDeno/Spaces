@@ -10,6 +10,9 @@ export interface AppConfig {
   };
   bcryptRounds: number;
   logRequestBodies: boolean;
+  platform: {
+    commissionPercent: number;
+  };
   mpesa: {
     consumerKey: string;
     consumerSecret: string;
@@ -38,6 +41,12 @@ export interface AppConfig {
 }
 
 const DEV_JWT_SECRET = 'dev-only-secret';
+
+function clampPercent(n: number): number {
+  if (!Number.isFinite(n) || n < 0) return 0;
+  if (n > 100) return 100;
+  return n;
+}
 
 export const configuration = (): AppConfig => {
   const nodeEnv = process.env.NODE_ENV ?? 'development';
@@ -79,6 +88,12 @@ export const configuration = (): AppConfig => {
     logRequestBodies: isProd
       ? process.env.LOG_REQUEST_BODIES === 'true'
       : process.env.LOG_REQUEST_BODIES !== 'false',
+    platform: {
+      // Percentage the platform keeps from each customer payment (0-100).
+      commissionPercent: clampPercent(
+        Number(process.env.PLATFORM_COMMISSION_PERCENT ?? 10)
+      ),
+    },
     mpesa: {
       consumerKey: process.env.MPESA_CONSUMER_KEY ?? '',
       consumerSecret: process.env.MPESA_CONSUMER_SECRET ?? '',

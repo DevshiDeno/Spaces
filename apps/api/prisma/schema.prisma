@@ -51,6 +51,12 @@ enum ApplicationStatus {
   REJECTED
 }
 
+enum PayoutStatus {
+  PENDING
+  SETTLED
+  FAILED
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Models
 // ─────────────────────────────────────────────────────────────────────────────
@@ -102,6 +108,8 @@ model Venue {
   timeOfDay     String[]   @default([])
   isVerified    Boolean    @default(false)
   isPublished   Boolean    @default(true)
+  payoutPhone   String?    // Normalized 254XXXXXXXXX — where the owner's share is settled
+  payoutTill    String?    // Optional Lipa Na M-Pesa till; preferred over phone if set
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 
@@ -142,19 +150,24 @@ model Event {
 }
 
 model Booking {
-  id              String         @id @default(cuid())
-  date            DateTime
-  startTime       String
-  endTime         String
-  guestCount      Int
-  totalAmount     Int
-  status          BookingStatus  @default(PENDING)
-  paymentMethod  PaymentMethod
-  paymentStatus  PaymentStatus  @default(PENDING)
-  paymentRef     String?
-  specialRequests String?        @db.Text
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  id               String         @id @default(cuid())
+  date             DateTime
+  startTime        String
+  endTime          String
+  guestCount       Int
+  totalAmount      Int
+  status           BookingStatus  @default(PENDING)
+  paymentMethod    PaymentMethod
+  paymentStatus    PaymentStatus  @default(PENDING)
+  paymentRef       String?
+  commissionAmount Int            @default(0) // Platform's cut (KES), frozen at booking time
+  payoutAmount     Int            @default(0) // Owner's share (KES), = totalAmount - commission
+  payoutStatus     PayoutStatus?              // null until payment SUCCEEDED; PENDING after
+  payoutAt         DateTime?
+  payoutRef        String?                    // Manual M-Pesa ref or B2C TransactionID
+  specialRequests  String?        @db.Text
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 
   venueId String
   venue   Venue  @relation(fields: [venueId], references: [id], onDelete: Restrict)
@@ -165,6 +178,7 @@ model Booking {
   @@index([venueId])
   @@index([date])
   @@index([paymentRef])
+  @@index([payoutStatus])
 }
 
 model Rsvp {

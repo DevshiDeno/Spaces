@@ -7,6 +7,7 @@ import {
   bookingConfirmationEmail,
   contactNotificationEmail,
   passwordResetEmail,
+  payoutSettledEmail,
   rsvpConfirmationEmail,
 } from './mail.templates';
 
@@ -105,6 +106,17 @@ export class MailService implements OnModuleInit {
     reference: string;
   }) {
     const { subject, html } = rsvpConfirmationEmail(args);
+    return this.send({ to: args.to, subject, html });
+  }
+
+  sendPayoutSettled(args: {
+    to: string;
+    ownerName: string;
+    venueName: string;
+    amountKES: number;
+    payoutRef: string;
+  }) {
+    const { subject, html } = payoutSettledEmail(args);
     return this.send({ to: args.to, subject, html });
   }
 

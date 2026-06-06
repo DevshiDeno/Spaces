@@ -35,6 +35,8 @@ const DashboardBookingsPage = lazy(() => import('@/pages/dashboard/DashboardBook
 const DashboardPagesPage = lazy(() => import('@/pages/dashboard/DashboardPagesPage'));
 const DashboardMediaPage = lazy(() => import('@/pages/dashboard/DashboardMediaPage'));
 const DashboardSettingsPage = lazy(() => import('@/pages/dashboard/DashboardSettingsPage'));
+const DashboardEarningsPage = lazy(() => import('@/pages/dashboard/DashboardEarningsPage'));
+const DashboardPayoutsPage = lazy(() => import('@/pages/dashboard/DashboardPayoutsPage'));
 
 const withSuspense = (node: React.ReactNode) => (
   <Suspense fallback={<FullPageSpinner />}>{node}</Suspense>
@@ -107,6 +109,22 @@ export const router = createBrowserRouter([
         element: (
           <RoleGate allow={['SPACE_OWNER', 'ADMIN']}>
             {withSuspense(<DashboardBookingsPage />)}
+          </RoleGate>
+        ),
+      },
+      {
+        path: 'earnings',
+        element: (
+          <RoleGate allow={['SPACE_OWNER', 'ADMIN']}>
+            {withSuspense(<DashboardEarningsPage />)}
+          </RoleGate>
+        ),
+      },
+      {
+        path: 'payouts',
+        element: (
+          <RoleGate allow={['ADMIN']}>
+            {withSuspense(<DashboardPayoutsPage />)}
           </RoleGate>
         ),
       },

@@ -54,6 +54,8 @@ const BEST_FOR_OPTIONS = [
 ];
 const TIME_OF_DAY_OPTIONS = ['Morning', 'Afternoon', 'Evening'] as const;
 
+const PHONE_REGEX = /^(?:\+?254|0)?(7|1)\d{8}$/;
+
 export const spaceFormSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   tagline: z.string().min(2, 'Tagline must be at least 2 characters'),
@@ -71,6 +73,10 @@ export const spaceFormSchema = z.object({
   bestFor: z.array(z.string()),
   timeOfDay: z.array(z.string()),
   isPublished: z.boolean(),
+  payoutPhone: z
+    .string()
+    .min(1, 'Where should we send your bookings income?')
+    .refine((v) => PHONE_REGEX.test(v.trim()), 'Use a valid Kenyan number e.g. 0712345678'),
 });
 
 export type SpaceFormValues = z.infer<typeof spaceFormSchema>;
@@ -92,6 +98,7 @@ export const SPACE_FORM_EMPTY_DEFAULTS: SpaceFormValues = {
   bestFor: [],
   timeOfDay: [],
   isPublished: true,
+  payoutPhone: '',
 };
 
 interface SpaceFormProps {
@@ -191,6 +198,21 @@ export function SpaceForm({ defaultValues, onSubmit, onCancel, submitLabel }: Sp
             {...register('bookingFee')}
           />
         </div>
+      </FormSection>
+
+      <FormSection
+        title="Payouts"
+        description="After a customer pays, your share lands here. We disburse on a rolling basis (see the Earnings tab)."
+      >
+        <Input
+          label="M-Pesa phone number"
+          type="tel"
+          inputMode="numeric"
+          placeholder="0712 345 678"
+          hint="Used as the destination for your booking earnings."
+          error={errors.payoutPhone?.message}
+          {...register('payoutPhone')}
+        />
       </FormSection>
 
       <FormSection

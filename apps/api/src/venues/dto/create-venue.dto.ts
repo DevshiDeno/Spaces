@@ -29,4 +29,8 @@ export class CreateVenueDto {
   @ApiPropertyOptional({ enum: NoiseLevel }) @IsOptional() @IsEnum(NoiseLevel) noiseLevel?: NoiseLevel;
   @ApiPropertyOptional({ type: [String] }) @IsOptional() @IsArray() @IsString({ each: true }) timeOfDay?: string[];
   @ApiPropertyOptional() @IsOptional() @IsBoolean() isPublished?: boolean;
+  @ApiPropertyOptional({ description: 'M-Pesa phone number where the owner gets paid (any Kenyan format)' })
+  @IsOptional() @IsString() payoutPhone?: string;
+  @ApiPropertyOptional({ description: 'M-Pesa Till number (preferred over phone if set)' })
+  @IsOptional() @IsString() payoutTill?: string;
 }

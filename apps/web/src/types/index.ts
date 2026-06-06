@@ -41,6 +41,8 @@ export interface Venue {
   isPublished?: boolean;
   bookingFee: number;
   ownerId: ID;
+  payoutPhone?: string | null;
+  payoutTill?: string | null;
   createdAt: string;
 }
 
@@ -88,6 +90,7 @@ export interface AppEvent {
 
 export type PaymentMethod = 'MPESA' | 'CARD';
 export type PaymentStatus = 'PENDING' | 'SUCCEEDED' | 'FAILED';
+export type PayoutStatus = 'PENDING' | 'SETTLED' | 'FAILED';
 
 export interface Booking {
   id: ID;
@@ -99,12 +102,37 @@ export interface Booking {
   endTime: string;
   guestCount: number;
   totalAmount: number;
+  commissionAmount?: number;
+  payoutAmount?: number;
+  payoutStatus?: PayoutStatus | null;
+  payoutAt?: string | null;
+  payoutRef?: string | null;
   status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
   paymentMethod: PaymentMethod;
   paymentStatus?: PaymentStatus;
   paymentRef?: string;
   specialRequests?: string;
   createdAt: string;
+  venue?: {
+    name: string;
+    slug: string;
+    coverImage?: string;
+    payoutPhone?: string | null;
+    payoutTill?: string | null;
+    owner?: { id: ID; name: string; email: string };
+  };
+  user?: { name: string; email?: string };
+}
+
+export interface OwnerEarnings {
+  summary: {
+    totalEarned: number;
+    pendingSettlement: number;
+    settledLifetime: number;
+    settledThisMonth: number;
+    bookingCount: number;
+  };
+  bookings: Booking[];
 }
 
 export interface Rsvp {

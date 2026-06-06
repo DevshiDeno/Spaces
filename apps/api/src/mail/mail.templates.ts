@@ -119,6 +119,25 @@ export function rsvpConfirmationEmail(input: {
   return { subject, html };
 }
 
+export function payoutSettledEmail(input: {
+  ownerName: string;
+  venueName: string;
+  amountKES: number;
+  payoutRef: string;
+}) {
+  const subject = `Payout sent: ${input.venueName}`;
+  const html = layout({
+    heading: `KES ${input.amountKES.toLocaleString()} is on its way.`,
+    body: `<p>Hi ${input.ownerName.split(' ')[0]}, your earnings from <strong>${input.venueName}</strong> have been settled.</p>
+           <table style="margin-top:12px;font-size:14px;">
+             <tr><td style="padding:4px 12px 4px 0;color:#857e77;">Amount</td><td>KES ${input.amountKES.toLocaleString()}</td></tr>
+             <tr><td style="padding:4px 12px 4px 0;color:#857e77;">M-Pesa ref</td><td><code>${input.payoutRef}</code></td></tr>
+           </table>
+           <p style="margin-top:16px;color:#857e77;font-size:13px;">If you don't see the funds in a few minutes, reach out and we'll investigate.</p>`,
+  });
+  return { subject, html };
+}
+
 export function contactNotificationEmail(input: {
   name: string;
   email: string;

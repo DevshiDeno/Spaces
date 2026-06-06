@@ -6,9 +6,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/prisma/prisma.service';
 import { PaymentsService } from '@/payments/payments.service';
 import { MailService } from '@/mail/mail.service';
+import { computeSplit } from '@/common/utils/money';
+import type { AppConfig } from '@/config/configuration';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import type { AuthenticatedUser } from '@/common/decorators/current-user.decorator';
 
@@ -19,7 +22,8 @@ export class BookingsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly payments: PaymentsService,
-    private readonly mail: MailService
+    private readonly mail: MailService,
+    private readonly config: ConfigService<AppConfig>
   ) {}
 
   async create(userId: string, dto: CreateBookingDto) {
@@ -41,6 +45,12 @@ export class BookingsService {
     if (dto.paymentMethod === 'MPESA' && !dto.phone) {
       throw new BadRequestException('Phone number is required for M-Pesa payments');
     }
+
+    // Freeze the platform's split at booking time so a later commission rate
+    // change can't retroactively rewrite past bookings.
+    const commissionPercent =
+      this.config.get('platform.commissionPercent', { infer: true }) ?? 0;
+    const split = computeSplit(dto.totalAmount, commissionPercent);
 
     // Normalize the date to UTC midnight so equality matching is deterministic
     // regardless of what the caller sent in the DTO.
@@ -78,6 +88,8 @@ export class BookingsService {
             endTime: dto.endTime,
             guestCount: dto.guestCount,
             totalAmount: dto.totalAmount,
+            commissionAmount: split.commission,
+            payoutAmount: split.payout,
             paymentMethod: dto.paymentMethod,
             specialRequests: dto.specialRequests,
             status: 'PENDING',
@@ -113,6 +125,8 @@ export class BookingsService {
         paymentStatus: payment.status,
         paymentRef: payment.reference,
         status: bookingStatus,
+        // Mark payout-pending the moment money is confirmed received.
+        ...(payment.status === 'SUCCEEDED' && { payoutStatus: 'PENDING' }),
       },
       include: {
         venue: { select: { name: true, slug: true, coverImage: true } },

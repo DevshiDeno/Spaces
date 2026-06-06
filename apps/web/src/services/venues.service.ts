@@ -19,6 +19,8 @@ export interface CreateVenuePayload {
   noiseLevel?: 'QUIET' | 'MODERATE' | 'LOUD';
   timeOfDay?: string[];
   isPublished?: boolean;
+  payoutPhone?: string;
+  payoutTill?: string;
 }
 
 export const venuesService = {

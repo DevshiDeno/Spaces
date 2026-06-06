@@ -183,6 +183,8 @@ export class PaymentsService {
           paymentStatus: status,
           // CANCELLED on failure releases the slot from the overlap check.
           status: status === 'SUCCEEDED' ? 'CONFIRMED' : 'CANCELLED',
+          // Owner is owed money once payment confirmed; admin will settle.
+          ...(status === 'SUCCEEDED' && { payoutStatus: 'PENDING' }),
         },
       });
       if (status === 'SUCCEEDED') {

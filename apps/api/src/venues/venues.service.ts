@@ -1,7 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { slugify } from '@/common/utils/slug';
+import { normalizeKenyanPhone } from '@/common/utils/money';
 import { CreateVenueDto } from './dto/create-venue.dto';
 import { UpdateVenueDto } from './dto/update-venue.dto';
 import { VenueFiltersDto } from './dto/venue-filters.dto';
@@ -79,9 +80,11 @@ export class VenuesService {
 
   async create(ownerId: string, dto: CreateVenueDto) {
     const slug = await this.uniqueSlug(dto.name);
+    const payoutPhone = this.normalizePayoutPhone(dto.payoutPhone);
     return this.prisma.venue.create({
       data: {
         ...dto,
+        payoutPhone,
         slug,
         ownerId,
       },
@@ -97,7 +100,23 @@ export class VenuesService {
     if (dto.name && dto.name !== existing.name) {
       data.slug = await this.uniqueSlug(dto.name, id);
     }
+    if (dto.payoutPhone !== undefined) {
+      data.payoutPhone = this.normalizePayoutPhone(dto.payoutPhone);
+    }
     return this.prisma.venue.update({ where: { id }, data });
+  }
+
+  private normalizePayoutPhone(input: string | undefined): string | null {
+    if (input === undefined) return null;
+    const trimmed = input.trim();
+    if (trimmed === '') return null;
+    const normalized = normalizeKenyanPhone(trimmed);
+    if (!normalized) {
+      throw new BadRequestException(
+        'Payout phone must be a valid Kenyan mobile number (e.g. 0712345678 or +254712345678).'
+      );
+    }
+    return normalized;
   }
 
   async remove(id: string, user: AuthenticatedUser) {

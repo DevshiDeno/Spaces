@@ -26,6 +26,7 @@ function toFormValues(v: Venue): SpaceFormValues {
     bestFor: v.bestFor ?? [],
     timeOfDay: v.timeOfDay ?? [],
     isPublished: v.isPublished ?? true,
+    payoutPhone: v.payoutPhone ?? '',
   };
 }
 
