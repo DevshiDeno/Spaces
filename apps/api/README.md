@@ -179,11 +179,11 @@ Errors go through `HttpExceptionFilter`:
 1. Get sandbox credentials at https://developer.safaricom.co.ke
 2. Set `MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`, `MPESA_SHORTCODE`, `MPESA_PASSKEY` in `.env`
 3. Expose `MPESA_CALLBACK_URL` to the internet (ngrok in dev): `ngrok http 4000` → put the https URL in `.env` and Daraja's portal
-4. Implement the two TODO blocks in [src/payments/payments.service.ts](src/payments/payments.service.ts):
+4. That's it — the STK Push and callback handler are already implemented in [src/payments/payments.service.ts](src/payments/payments.service.ts):
    - `initiateMpesa()` — OAuth token → STK Push request
    - `handleMpesaCallback()` — verify + update `Booking.paymentStatus`
 
-Both methods currently return mocked success when credentials are missing, so the booking flow works for development without Daraja access.
+They activate automatically once the `MPESA_*` vars above are set. Both methods fall back to mocked success when credentials are missing, so the booking flow works for development without Daraja access.
 
 ## Wiring up Stripe (or Flutterwave / DPO)
 
@@ -277,10 +277,9 @@ Daraja needs your callback URL pre-registered. Once you have your Fly app URL:
 
 ## What's still TODO before production
 
-- Real M-Pesa Daraja + Stripe integration (see above)
+- Real Stripe (card) integration — M-Pesa Daraja STK Push is done; card payments still stubbed in `initiateCard()`
 - File uploads → S3 / Cloudinary (currently `coverImage` / `images` are just URLs)
-- Transactional emails (booking confirmations, RSVP receipts, application acknowledgements)
-- Refresh tokens + forgot-password flow
+- Refresh tokens (forgot-password flow + transactional emails are done — booking/RSVP confirmations, payout-settled, contact, ally invite, password reset)
 - Reviews & ratings (model already has `rating` / `reviewCount` on `Venue`)
 - Rate-limiting tightening on auth routes
 - CSRF + cookie-based session option (currently bearer-only)

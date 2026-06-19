@@ -1,21 +1,9 @@
-# fly.toml app configuration file generated for spaces-api on 2026-05-14T14:19:19Z
-#
-# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
-#
-
 app = 'spaces-api'
 primary_region = 'jnb'
-# Run all fly commands from inside apps/api/ (or pass -c apps/api/fly.toml).
-# Build context = this folder. Dockerfile lives next to this file.
-
-app = "spaces-api"
-primary_region = "jnb"  # Johannesburg — ~50ms to Nairobi. Use "fra" if jnb is congested.
 
 [build]
-  dockerfile = 'Dockerfile'
+dockerfile = "apps/api/Dockerfile"
 
-# Runs once before the new release takes traffic. Safe to re-run — `migrate
-# deploy` is a no-op when there's nothing pending.
 [deploy]
   release_command = "npx prisma migrate deploy"
 
@@ -23,6 +11,8 @@ primary_region = "jnb"  # Johannesburg — ~50ms to Nairobi. Use "fra" if jnb is
   API_GLOBAL_PREFIX = 'api'
   NODE_ENV = 'production'
   PORT = '4000'
+  CORS_ORIGINS = 'https://www.spaces.co.ke'
+  WEB_APP_URL = 'https://www.spaces.co.ke'
 
 [http_service]
   internal_port = 4000
