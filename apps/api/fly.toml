@@ -1,8 +1,9 @@
 app = 'spaces-api'
 primary_region = 'jnb'
 
-# Deploy from the repo root with `fly deploy -c apps/api/fly.toml` so the build
-# context is the monorepo root — which is what this Dockerfile expects.
+# flyctl resolves `dockerfile` relative to THIS file's dir and uses that dir as
+# the build context — so this is apps/api/Dockerfile built with apps/api as the
+# context. Deploy with `fly deploy -c apps/api/fly.toml` (runs fine from anywhere).
 [build]
 dockerfile = "Dockerfile"
 
