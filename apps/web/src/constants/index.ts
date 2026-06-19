@@ -3,7 +3,7 @@ export const APP_TAGLINE = 'Inclusive Spaces. Safer Experiences. Creative Connec
 export const APP_DESCRIPTION =
   'Discover, book, and host inclusive creative venues across Kenya. Safer experiences for everyone.';
 
-export const SUPPORT_EMAIL = 'support.spaces.co.ke@gmail.com';
+export const SUPPORT_EMAIL = 'support@spaces.co.ke';
 export const SUPPORT_PHONE = '+254 700 000 000';
 export const COMPANY_LOCATION = 'Nairobi, Kenya';
 
