@@ -3,15 +3,15 @@ export const APP_TAGLINE = 'Inclusive Spaces. Safer Experiences. Creative Connec
 export const APP_DESCRIPTION =
   'Discover, book, and host inclusive creative venues across Kenya. Safer experiences for everyone.';
 
-export const SUPPORT_EMAIL = 'hello@qreativespaces.co.ke';
+export const SUPPORT_EMAIL = 'support.spaces.co.ke@gmail.com';
 export const SUPPORT_PHONE = '+254 700 000 000';
 export const COMPANY_LOCATION = 'Nairobi, Kenya';
 
 export const SOCIAL_LINKS = {
-  instagram: 'https://instagram.com/qreativespaces',
-  twitter: 'https://twitter.com/qreativespaces',
-  facebook: 'https://facebook.com/qreativespaces',
-  linkedin: 'https://linkedin.com/company/qreativespaces',
+  instagram: 'https://instagram.com/spaces',
+  twitter: 'https://twitter.com/spaces',
+  facebook: 'https://facebook.com/spaces',
+  linkedin: 'https://linkedin.com/company/spaces',
 } as const;
 
 export const CITIES = ['Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret'] as const;
