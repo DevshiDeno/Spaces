@@ -1,8 +1,10 @@
 app = 'spaces-api'
 primary_region = 'jnb'
 
+# Deploy from the repo root with `fly deploy -c apps/api/fly.toml` so the build
+# context is the monorepo root — which is what this Dockerfile expects.
 [build]
-dockerfile = "apps/api/Dockerfile"
+dockerfile = "Dockerfile"
 
 [deploy]
   release_command = "npx prisma migrate deploy"
