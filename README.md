@@ -68,4 +68,47 @@ in-memory fixtures. Flip it to `false` to point at the real API on
 | `npm run db:seed`      | Seed the database with fixtures                           |
 | `npm run db:studio`    | Open Prisma Studio for the DB                             |
 
+## Booking Calendar (roadmap)
+
+A dashboard calendar so venue owners see bookings at a glance, evolving toward
+collision-proof scheduling against their own and external calendars.
+
+### Phase 1 — Read-only booking calendar ✅ (shipped)
+
+Month grid at `/dashboard/calendar` (owner/admin), wired to the existing
+`/bookings/owner` feed — no backend change. Status-colored entries (Confirmed /
+Pending-held / Completed; cancelled slots hidden), per-venue filter, and a
+day-detail panel. The calendar *reflects* bookings; it is not the source of
+truth. Collision logic stays server-side. Days are derived from the booking
+date's `YYYY-MM-DD` prefix to avoid timezone drift.
+
+### Phase 2 — Manual availability blocks (planned)
+
+Let owners mark time as busy (maintenance, private/offline events) so public
+bookings can't land on it. This is the piece that makes the calendar *prevent*
+collisions, not just display them.
+
+- New `AvailabilityBlock { venueId, date, startTime, endTime, reason? }` model
+  (`prisma migrate dev --name availability_blocks`).
+- One extra overlap check inside the existing serializable transaction in
+  [apps/api/src/bookings/bookings.service.ts](apps/api/src/bookings/bookings.service.ts)
+  — reject a booking that intersects a block, same half-open interval test
+  already used for booking-vs-booking conflicts.
+- Calendar UI: click an empty slot to add a block; render blocks as a distinct lane.
+
+### Phase 3 — External "business calendar" sync (later, opt-in)
+
+Two-way sync with Google/Outlook so an owner's real calendar and the platform
+stay collision-free.
+
+- **Cheap first step (one-way, no OAuth):** publish a per-owner iCal `.ics` feed
+  of bookings to subscribe to; and/or import a secret iCal URL of their calendar,
+  treating its busy events as Phase-2 blocks.
+- **Full sync:** per-owner OAuth, token storage, push/poll, mapping bookings ⇄
+  external events, with recurring-event expansion and timezone normalization.
+
+> **Timezone note:** booking times are stored as `startTime`/`endTime` strings
+> with `date` at UTC midnight. Treat them as **venue-local** (Kenya, EAT/UTC+3)
+> when rendering; long-term, consider a `timezone` field on `Venue`.
+
 See [apps/web/README.md](apps/web/README.md) and [apps/api/README.md](apps/api/README.md) for app-specific details.
