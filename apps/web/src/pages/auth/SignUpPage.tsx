@@ -96,7 +96,7 @@ export default function SignUpPage() {
       <div className="mt-4 rounded-lg border border-border bg-muted/40 p-3 text-center text-xs text-muted-foreground">
         Want to list a venue?{' '}
         <Link to="/become-an-ally" className="font-medium text-primary hover:underline">
-          Apply to become an ally
+          Apply to become a spacer
         </Link>
         . We'll review your application and send you a login invite.
       </div>

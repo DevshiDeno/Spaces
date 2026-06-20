@@ -50,7 +50,7 @@ export default function DashboardOverviewPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="heading-display text-3xl font-bold tracking-tight">
-            Welcome back, {user?.name?.split(' ')[0] ?? 'Qreative'} 👋
+            Welcome back, {user?.name?.split(' ')[0] ?? 'Space User'} 👋
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">Here's what's happening across your network today.</p>
         </div>

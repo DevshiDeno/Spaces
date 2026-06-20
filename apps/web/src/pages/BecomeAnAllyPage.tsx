@@ -71,10 +71,10 @@ export default function BecomeAnAllyPage() {
         <Container>
           <div className="max-w-3xl">
             <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-              Become a Spaces For you
+              Become a spacer
             </span>
             <h1 className="heading-display mt-3 text-4xl font-bold leading-tight text-balance sm:text-5xl lg:text-6xl">
-              Become a Spaces For you Ally.
+              Become a spacer.
             </h1>
             <p className="mt-5 text-lg text-muted-foreground">
               Earn our official badge as proof of your commitment to responsible hospitality. Join a
@@ -121,7 +121,7 @@ export default function BecomeAnAllyPage() {
           <SectionHeading
             align="center"
             eyebrow="Application"
-            title="Apply to Become an Ally"
+            title="Apply to Become a spacer"
             description="Tell us about your space. We'll review your application within 5-7 business days."
           />
 
@@ -133,7 +133,7 @@ export default function BecomeAnAllyPage() {
                 </div>
                 <h3 className="mt-4 text-xl font-semibold">Application submitted!</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Thank you for your interest in becoming a Spaces For you ally. We've received your
+                  Thank you for your interest in becoming a spacer. We've received your
                   application and will review it within 5-7 business days.
                 </p>
               </div>

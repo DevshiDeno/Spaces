@@ -18,7 +18,7 @@ const linkGroups = [
   {
     title: 'For Venues',
     links: [
-      { label: 'Become an Ally', to: '/become-an-ally' },
+      { label: 'Become a spacer', to: '/become-an-ally' },
       { label: 'Training Program', to: '/become-an-ally#training' },
       { label: 'Sign in', to: '/sign-in' },
       { label: 'List your space', to: '/become-an-ally' },

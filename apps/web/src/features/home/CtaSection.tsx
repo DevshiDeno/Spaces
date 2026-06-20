@@ -35,7 +35,7 @@ export function CtaSection() {
               rightIcon={<ArrowRight className="h-4 w-4" />}
               className="bg-white text-coral-600 hover:bg-white/95"
             >
-              Become an Ally
+              Become a spacer
             </Button>
           </div>
         </div>

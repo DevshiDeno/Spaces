@@ -72,7 +72,7 @@ export function HeroSection() {
               variant="outline"
               onClick={() => navigate('/become-an-ally')}
             >
-              Become an Ally
+              Become a spacer
             </Button>
           </div>
 

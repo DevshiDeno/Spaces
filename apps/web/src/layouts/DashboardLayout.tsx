@@ -96,10 +96,10 @@ export function DashboardLayout() {
         <div className="absolute bottom-0 left-0 right-0 border-t border-border p-4">
           <div className="mb-3 flex items-center gap-3 rounded-lg bg-muted/50 p-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-              {user?.name?.[0] ?? 'Q'}
+              {user?.name?.[0] ?? 'S'}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">{user?.name ?? 'Qreative User'}</p>
+              <p className="truncate text-sm font-medium">{user?.name ?? 'Space User'}</p>
               <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
             </div>
           </div>
