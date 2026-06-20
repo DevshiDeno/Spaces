@@ -1,4 +1,4 @@
-// Qreative Spaces — Prisma schema
+// Spaces For you — Prisma schema
 // Datasource: Postgres. Run `npm run db:migrate` to apply.
 
 generator client {

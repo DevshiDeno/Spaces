@@ -10,7 +10,7 @@ export default function PrivacyPage() {
           Our privacy policy and data protection practices
         </h1>
         <p className="mt-4 text-base text-muted-foreground">
-          At Qreative Spaces, we take your privacy seriously. This Privacy Policy explains how we
+          At Spaces For you, we take your privacy seriously. This Privacy Policy explains how we
           collect, use, and protect your personal information.
         </p>
 

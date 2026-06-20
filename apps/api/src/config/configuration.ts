@@ -109,7 +109,7 @@ export const configuration = (): AppConfig => {
     },
     mail: {
       resendApiKey: process.env.RESEND_API_KEY ?? '',
-      from: process.env.MAIL_FROM ?? 'Qreative Spaces <onboarding@resend.dev>',
+      from: process.env.MAIL_FROM ?? 'Spaces For you <onboarding@resend.dev>',
       supportEmail: process.env.SUPPORT_EMAIL ?? '',
     },
     r2: {

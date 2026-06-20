@@ -15,5 +15,5 @@ if (isProdBuild && !apiBaseUrlRaw) {
 
 export const env: EnvConfig = {
   apiBaseUrl: apiBaseUrlRaw ?? 'http://localhost:4000/api',
-  appName: import.meta.env.VITE_APP_NAME ?? 'Qreative Spaces',
+  appName: import.meta.env.VITE_APP_NAME ?? 'Spaces For you',
 };

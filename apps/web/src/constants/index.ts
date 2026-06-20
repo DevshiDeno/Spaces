@@ -1,4 +1,4 @@
-export const APP_NAME = 'Qreative Spaces';
+export const APP_NAME = 'Spaces For you';
 export const APP_TAGLINE = 'Inclusive Spaces. Safer Experiences. Creative Connections.';
 export const APP_DESCRIPTION =
   'Discover, book, and host inclusive creative venues across Kenya. Safer experiences for everyone.';

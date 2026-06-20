@@ -1,6 +1,6 @@
-# Qreative Spaces — API
+# Spaces For you — API
 
-NestJS 10 + Prisma 5 + Postgres backend for the Qreative Spaces platform.
+NestJS 10 + Prisma 5 + Postgres backend for the Spaces For you platform.
 
 ## What's inside
 

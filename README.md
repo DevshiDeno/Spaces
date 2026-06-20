@@ -1,4 +1,4 @@
-# Qreative Spaces — Monorepo
+# Spaces For you — Monorepo
 
 > Inclusive venues platform for Kenya. Two apps in one workspace.
 

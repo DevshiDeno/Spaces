@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1
 #
-# Production image for the Qreative Spaces API (NestJS + Prisma).
+# Production image for the Spaces For you API (NestJS + Prisma).
 # Build context = apps/api/  (i.e. `fly deploy` from inside this folder).
 # ──────────────────────────────────────────────────────────────────────────
 

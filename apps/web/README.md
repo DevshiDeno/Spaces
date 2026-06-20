@@ -1,4 +1,4 @@
-# Qreative Spaces — Frontend
+# Spaces For you — Frontend
 
 > **Inclusive Spaces · Safer Experiences · Creative Connections.**
 >
@@ -123,7 +123,7 @@ npm run preview
 | Variable               | Default                          | Notes                                                              |
 | ---------------------- | -------------------------------- | ------------------------------------------------------------------ |
 | `VITE_API_BASE_URL`    | `http://localhost:4000/api`      | Used when `VITE_USE_MOCK_API=false`.                              |
-| `VITE_APP_NAME`        | `Qreative Spaces`                | Visible app name.                                                  |
+| `VITE_APP_NAME`        | `Spaces For you`                | Visible app name.                                                  |
 | `VITE_USE_MOCK_API`    | `true`                           | When `true`, services return in-memory fixtures with a small delay. |
 
 > **Mock-first.** The app ships with realistic fixtures so you can run, demo, and
@@ -188,4 +188,4 @@ fallback already wired.
 
 ## 📝 License
 
-Internal proprietary code. © Qreative Spaces, Nairobi.
+Internal proprietary code. © Spaces For you, Nairobi.

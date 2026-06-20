@@ -25,7 +25,7 @@ export function AuthLayout() {
               communities across Kenya.
             </p>
           </div>
-          <p className="text-xs text-white/70">© Qreative Spaces · Nairobi, Kenya</p>
+          <p className="text-xs text-white/70">© Spaces For you · Nairobi, Kenya</p>
         </div>
       </aside>
       <main className="relative col-span-3 flex flex-col items-center justify-center px-6 py-10">

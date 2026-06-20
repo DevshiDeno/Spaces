@@ -2,7 +2,7 @@
   "name": "qreative-spaces",
   "private": true,
   "version": "1.0.0",
-  "description": "Qreative Spaces monorepo — inclusive venues platform for Kenya.",
+  "description": "Spaces For you monorepo — inclusive venues platform for Kenya.",
   "workspaces": [
     "apps/*"
   ],

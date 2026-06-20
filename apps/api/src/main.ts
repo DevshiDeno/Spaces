@@ -51,7 +51,7 @@ async function bootstrap() {
   );
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Qreative Spaces API')
+    .setTitle('Spaces For you API')
     .setDescription('Inclusive venues platform — REST API')
     .setVersion('1.0.0')
     .addBearerAuth()

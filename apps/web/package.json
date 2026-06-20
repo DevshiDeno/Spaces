@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Qreative Spaces — discover, book, and host inclusive creative venues across Kenya.",
+  "description": "Spaces For you — discover, book, and host inclusive creative venues across Kenya.",
     "engines": {
     "node": "20.x"
   },

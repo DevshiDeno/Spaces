@@ -71,7 +71,7 @@ export default function DashboardSettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Appearance</CardTitle>
-            <CardDescription>Customize how Qreative Spaces looks for you.</CardDescription>
+            <CardDescription>Customize how Spaces For you looks for you.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between rounded-lg border border-border p-4">

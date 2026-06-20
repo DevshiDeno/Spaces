@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
 import { Section, SectionHeading } from '@/components/ui/Section';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { VenueCard, VenueCardSkeleton } from '@/features/venues/VenueCard';
 import { useFeaturedVenues } from '@/hooks/useVenues';
 
@@ -32,6 +33,14 @@ export function FeaturedVenuesSection() {
           {isError && (
             <div className="sm:col-span-2 lg:col-span-3">
               <ErrorState onRetry={() => refetch()} />
+            </div>
+          )}
+          {!isLoading && !isError && data?.length === 0 && (
+            <div className="sm:col-span-2 lg:col-span-3">
+              <EmptyState
+                title="No venues yet"
+                description="There are no featured venues to show right now. Check back soon."
+              />
             </div>
           )}
           {data?.map((venue, i) => <VenueCard key={venue.id} venue={venue} index={i} />)}

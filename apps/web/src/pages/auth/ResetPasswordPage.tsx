@@ -48,7 +48,7 @@ export default function ResetPasswordPage() {
     <>
       <h1 className="heading-display text-3xl font-bold tracking-tight">Set a new password</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        Choose a new password for your Qreative Spaces account.
+        Choose a new password for your Spaces For you account.
       </p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4">

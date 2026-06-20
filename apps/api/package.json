@@ -1,7 +1,7 @@
 {
   "name": "@spaces/api",
   "version": "1.0.0",
-  "description": "Qreative Spaces — NestJS + Prisma + Postgres backend.",
+  "description": "Spaces For you — NestJS + Prisma + Postgres backend.",
   "private": true,
   "scripts": {
     "build": "nest build",

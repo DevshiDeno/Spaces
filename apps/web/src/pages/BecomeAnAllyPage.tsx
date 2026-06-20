@@ -35,7 +35,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 const benefits = [
-  { icon: ShieldCheck, title: 'Get Certified', description: 'Earn the Qreative Space badge to show your commitment to inclusivity.' },
+  { icon: ShieldCheck, title: 'Get Certified', description: 'Earn the Spaces For you badge to show your commitment to inclusivity.' },
   { icon: TrendingUp, title: 'Increase Bookings', description: 'Reach a diverse community looking for inclusive spaces.' },
   { icon: Users, title: 'Join a Network', description: 'Connect with other ally venues and share best practices.' },
   { icon: Sparkles, title: 'Inclusive Training', description: 'Free safer-space training for your team and venue.' },
@@ -71,10 +71,10 @@ export default function BecomeAnAllyPage() {
         <Container>
           <div className="max-w-3xl">
             <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-              Become a Qreative Space
+              Become a Spaces For you
             </span>
             <h1 className="heading-display mt-3 text-4xl font-bold leading-tight text-balance sm:text-5xl lg:text-6xl">
-              Become a Qreative Space Ally.
+              Become a Spaces For you Ally.
             </h1>
             <p className="mt-5 text-lg text-muted-foreground">
               Earn our official badge as proof of your commitment to responsible hospitality. Join a
@@ -133,7 +133,7 @@ export default function BecomeAnAllyPage() {
                 </div>
                 <h3 className="mt-4 text-xl font-semibold">Application submitted!</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Thank you for your interest in becoming a Qreative Space ally. We've received your
+                  Thank you for your interest in becoming a Spaces For you ally. We've received your
                   application and will review it within 5-7 business days.
                 </p>
               </div>

@@ -17,7 +17,7 @@ export default function AboutPage() {
       <Section spacing="tight" className="bg-cream/40 dark:bg-card/30">
         <Container>
           <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-            About Qreative Spaces
+            About Spaces For you
           </span>
           <h1 className="heading-display mt-3 max-w-3xl text-4xl font-bold leading-tight text-balance sm:text-5xl lg:text-6xl">
             Building inclusive communities, one space at a time.
@@ -36,7 +36,7 @@ export default function AboutPage() {
               <SectionHeading
                 eyebrow="Our Mission"
                 title="Safer experiences, especially powerful for niche or identity-centered platforms"
-                description="At Qreative Spaces, we partner with hospitality venues across Kenya to make every space safer, more welcoming, and unmistakably ours."
+                description="At Spaces For you, we partner with hospitality venues across Kenya to make every space safer, more welcoming, and unmistakably ours."
               />
               <p className="mt-4 text-base text-muted-foreground text-pretty">
                 We measure success by the positive change we create in our communities. From

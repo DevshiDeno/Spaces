@@ -5,7 +5,7 @@
  * If you outgrow these, the natural upgrade is React Email or MJML.
  */
 
-const BRAND = 'Qreative Spaces';
+const BRAND = 'Spaces For you';
 const BRAND_COLOR = '#E07A5F'; // coral, matches the web theme
 
 interface ButtonOpts {
@@ -52,7 +52,7 @@ export function allyInviteEmail(input: {
   inviteUrl: string;
   expiresAt: Date;
 }) {
-  const subject = "You're approved as a Qreative Spaces ally";
+  const subject = "You're approved as a Spaces For you ally";
   const html = layout({
     heading: `Welcome aboard, ${input.applicantName.split(' ')[0]}.`,
     body: `<p>Your application has been approved. Activate your owner account to start listing your space and managing bookings.</p>
@@ -67,7 +67,7 @@ export function passwordResetEmail(input: {
   resetUrl: string;
   expiresAt: Date;
 }) {
-  const subject = 'Reset your Qreative Spaces password';
+  const subject = 'Reset your Spaces For you password';
   const html = layout({
     heading: 'Reset your password',
     body: `<p>Hi ${input.name.split(' ')[0]}, we received a request to reset your password.</p>
@@ -151,7 +151,7 @@ export function contactNotificationEmail(input: {
     body: `<p><strong>From:</strong> ${escapeHtml(input.name)} &lt;${escapeHtml(input.email)}&gt;</p>
            <p><strong>Subject:</strong> ${escapeHtml(input.subject)}</p>
            <p style="margin-top:16px;white-space:pre-wrap;background:#f7f5f2;padding:16px;border-radius:8px;font-size:14px;">${escapeHtml(input.message)}</p>`,
-    footer: 'Sent from the Qreative Spaces contact form.',
+    footer: 'Sent from the Spaces For you contact form.',
   });
   return { subject, html };
 }
