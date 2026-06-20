@@ -14,7 +14,8 @@ dockerfile = "Dockerfile"
   API_GLOBAL_PREFIX = 'api'
   NODE_ENV = 'production'
   PORT = '4000'
-  CORS_ORIGINS = 'https://www.spaces.co.ke'
+  # CORS_ORIGINS is set via `fly secrets` (a Fly secret overrides [env] anyway),
+  # so it's intentionally not duplicated here.
   WEB_APP_URL = 'https://www.spaces.co.ke'
 
 [http_service]
