@@ -32,6 +32,7 @@ const DashboardSpaceNewPage = lazy(() => import('@/pages/dashboard/DashboardSpac
 const DashboardSpaceEditPage = lazy(() => import('@/pages/dashboard/DashboardSpaceEditPage'));
 const DashboardApplicationsPage = lazy(() => import('@/pages/dashboard/DashboardApplicationsPage'));
 const DashboardBookingsPage = lazy(() => import('@/pages/dashboard/DashboardBookingsPage'));
+const DashboardCalendarPage = lazy(() => import('@/pages/dashboard/DashboardCalendarPage'));
 const DashboardPagesPage = lazy(() => import('@/pages/dashboard/DashboardPagesPage'));
 const DashboardMediaPage = lazy(() => import('@/pages/dashboard/DashboardMediaPage'));
 const DashboardSettingsPage = lazy(() => import('@/pages/dashboard/DashboardSettingsPage'));
@@ -109,6 +110,14 @@ export const router = createBrowserRouter([
         element: (
           <RoleGate allow={['SPACE_OWNER', 'ADMIN']}>
             {withSuspense(<DashboardBookingsPage />)}
+          </RoleGate>
+        ),
+      },
+      {
+        path: 'calendar',
+        element: (
+          <RoleGate allow={['SPACE_OWNER', 'ADMIN']}>
+            {withSuspense(<DashboardCalendarPage />)}
           </RoleGate>
         ),
       },
