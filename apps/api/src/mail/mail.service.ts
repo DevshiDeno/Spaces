@@ -61,6 +61,8 @@ export class MailService implements OnModuleInit {
         this.logger.error(`Resend error for "${args.subject}": ${result.error.message}`);
         return { delivered: false };
       }
+      const to = Array.isArray(args.to) ? args.to.join(',') : args.to;
+      this.logger.log(`[mail] delivered "${args.subject}" to ${to} id=${result.data?.id}`);
       return { delivered: true, id: result.data?.id };
     } catch (err) {
       this.logger.error(

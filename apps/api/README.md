@@ -228,7 +228,7 @@ fly launch --no-deploy --copy-config --name spaces-api --region jnb
 fly secrets set \
   DATABASE_URL="postgresql://...neon.tech/spaces?sslmode=require" \
   JWT_SECRET="$(openssl rand -base64 48)" \
-  CORS_ORIGINS="https://qreativespaces.co.ke,https://www.qreativespaces.co.ke"
+  CORS_ORIGINS="https://www.spaces.co.ke,https://spaces.co.ke"
 
 # Optional payment + email secrets (the API falls back to mocked success without these)
 fly secrets set \
