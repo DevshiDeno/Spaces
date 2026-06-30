@@ -8,9 +8,26 @@ import { Public } from '@/common/decorators/public.decorator';
 export class HealthController {
   constructor(private readonly prisma: PrismaService) {}
 
+  /**
+   * Liveness — intentionally does NOT touch the database. Fly's health check
+   * hits this every minute; querying the DB here would keep a serverless
+   * Postgres (Neon) awake 24/7 and burn its compute allowance. Use /health/ready
+   * when you actually want to verify DB connectivity.
+   */
   @Public()
   @Get()
-  async check() {
+  check() {
+    return {
+      status: 'ok',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  /** Readiness — verifies DB connectivity. Wakes the DB, so use sparingly. */
+  @Public()
+  @Get('ready')
+  async ready() {
     let database = 'up';
     try {
       await this.prisma.$queryRaw`SELECT 1`;
@@ -19,7 +36,6 @@ export class HealthController {
     }
     return {
       status: database === 'up' ? 'ok' : 'degraded',
-      uptime: process.uptime(),
       database,
       timestamp: new Date().toISOString(),
     };

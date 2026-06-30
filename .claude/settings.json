@@ -5,7 +5,8 @@
       "Bash(npm run *)",
       "Bash(curl -s \"https://spaces-api.fly.dev/api/venues/featured\")",
       "Bash(git -C \"c:/Code/source/repos/Spaces\" diff apps/web/src/hooks/useVenues.ts apps/web/src/services/venues.service.ts)",
-      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" http://localhost:4000/api/events/featured)"
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" http://localhost:4000/api/events/featured)",
+      "Bash(fly secrets *)"
     ]
   }
 }
