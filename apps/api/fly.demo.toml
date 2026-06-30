@@ -1,0 +1,47 @@
+# Demo deployment of the API — isolated from production.
+# Points at the separate demo Neon DB (set via `fly secrets`). Machines
+# auto-stop when idle so the demo costs ~nothing between presentations.
+#
+# Deploy from apps/api with:  fly deploy -c fly.demo.toml -a spaces-api-demo --remote-only
+app = 'spaces-api-demo'
+primary_region = 'jnb'
+
+# flyctl resolves `dockerfile` relative to THIS file's dir (apps/api) and uses
+# that dir as the build context — so this is apps/api/Dockerfile.
+[build]
+dockerfile = "Dockerfile"
+
+[deploy]
+  release_command = "npx prisma migrate deploy"
+
+[env]
+  API_GLOBAL_PREFIX = 'api'
+  NODE_ENV = 'production'
+  PORT = '4000'
+  # CORS_ORIGINS, WEB_APP_URL, JWT_SECRET, DB + mail creds all come from
+  # `fly secrets` on the spaces-api-demo app.
+
+[http_service]
+  internal_port = 4000
+  force_https = true
+  # Auto-stop when idle, auto-start on request → minimal cost for a demo.
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [http_service.concurrency]
+    type = 'requests'
+    hard_limit = 250
+    soft_limit = 200
+
+  [[http_service.checks]]
+    # Liveness only — /api/health does not touch the DB.
+    interval = '60s'
+    timeout = '10s'
+    grace_period = '20s'
+    method = 'GET'
+    path = '/api/health'
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '512mb'
