@@ -79,11 +79,11 @@ async function main() {
   });
 
   await prisma.user.upsert({
-    where: { email: 'simon@mzizi.co.ke' },
+    where: { email: 'marleydeno83@gmail.com' },
     update: {},
     create: {
-      email: 'simon@mzizi.co.ke',
-      name: 'Simon Otieno',
+      email: 'marleydeno83@gmail.com',
+      name: 'Dennis Muturi',
       passwordHash: await bcrypt.hash('demo1234', 12),
       role: UserRole.USER,
     },
@@ -468,7 +468,7 @@ async function main() {
 
   console.log(`✅ Admin: ${admin.email} / admin123`);
   console.log(`✅ Owners: ${owner.email} / owner123  (+ ${owner2.email})`);
-  console.log(`✅ Demo user: simon@mzizi.co.ke / demo1234`);
+  console.log(`✅ Demo user: marleydeno83@gmail.com / demo1234`);
   console.log(`✅ ${venues.length} venues, ${events.length} events, ${guests.length} guests, ${bookings.length} bookings.`);
 }
 

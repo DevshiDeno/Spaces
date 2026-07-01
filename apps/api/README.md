@@ -61,7 +61,7 @@ Copy-Item apps/api/.env.example apps/api/.env
 | ------------ | ---------------------------------- | ----------- |
 | Admin        | `admin@qreativespaces.co.ke`       | `admin123`  |
 | Space Owner  | `owner@qreativespaces.co.ke`       | `owner123`  |
-| User         | `simon@mzizi.co.ke`                | `demo1234`  |
+| User         | `marleydeno83@gmail.com`           | `demo1234`  |
 
 ## Architecture
 
