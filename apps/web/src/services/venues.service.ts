@@ -21,6 +21,8 @@ export interface CreateVenuePayload {
   isPublished?: boolean;
   payoutPhone?: string;
   payoutTill?: string;
+  payoutPaybill?: string;
+  payoutAccount?: string;
 }
 
 export const venuesService = {

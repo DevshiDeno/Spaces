@@ -110,6 +110,8 @@ model Venue {
   isPublished   Boolean    @default(true)
   payoutPhone   String?    // Normalized 254XXXXXXXXX — where the owner's share is settled
   payoutTill    String?    // Optional Lipa Na M-Pesa till; preferred over phone if set
+  payoutPaybill String?    // Optional M-Pesa Paybill (business) number
+  payoutAccount String?    // Account number under the Paybill; required when payoutPaybill is set
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 

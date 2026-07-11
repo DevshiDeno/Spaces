@@ -66,6 +66,8 @@ export class PayoutsService {
             slug: true,
             payoutPhone: true,
             payoutTill: true,
+            payoutPaybill: true,
+            payoutAccount: true,
             owner: { select: { id: true, name: true, email: true } },
           },
         },

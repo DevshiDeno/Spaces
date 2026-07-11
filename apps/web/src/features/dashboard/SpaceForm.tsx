@@ -55,31 +55,76 @@ const BEST_FOR_OPTIONS = [
 const TIME_OF_DAY_OPTIONS = ['Morning', 'Afternoon', 'Evening'] as const;
 
 const PHONE_REGEX = /^(?:\+?254|0)?(7|1)\d{8}$/;
+const SHORTCODE_REGEX = /^\d{5,7}$/; // M-Pesa Till / Paybill business shortcodes
 
-export const spaceFormSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  tagline: z.string().min(2, 'Tagline must be at least 2 characters'),
-  description: z.string().min(20, 'Description must be at least 20 characters'),
-  type: z.string().min(1, 'Pick a venue type'),
-  city: z.string().min(1, 'City is required'),
-  address: z.string().min(1, 'Address is required'),
-  capacity: z.coerce.number().int().min(1, 'Capacity must be at least 1'),
-  pricePerHour: z.coerce.number().int().min(0, 'Price cannot be negative'),
-  bookingFee: z.coerce.number().int().min(0).optional(),
-  coverImage: z.string().min(1, 'Upload a cover image'),
-  noiseLevel: z.enum(['QUIET', 'MODERATE', 'LOUD']),
-  amenities: z.array(z.string()),
-  moods: z.array(z.string()),
-  bestFor: z.array(z.string()),
-  timeOfDay: z.array(z.string()),
-  isPublished: z.boolean(),
-  payoutPhone: z
-    .string()
-    .min(1, 'Where should we send your bookings income?')
-    .refine((v) => PHONE_REGEX.test(v.trim()), 'Use a valid Kenyan number e.g. 0712345678'),
-});
+export const PAYOUT_METHODS = [
+  { value: 'PHONE', label: 'M-Pesa Phone Number' },
+  { value: 'PAYBILL', label: 'Paybill Number' },
+  { value: 'TILL', label: 'Till Number (Buy Goods)' },
+] as const;
+
+export const spaceFormSchema = z
+  .object({
+    name: z.string().min(2, 'Name must be at least 2 characters'),
+    tagline: z.string().min(2, 'Tagline must be at least 2 characters'),
+    description: z.string().min(20, 'Description must be at least 20 characters'),
+    type: z.string().min(1, 'Pick a venue type'),
+    city: z.string().min(1, 'City is required'),
+    address: z.string().min(1, 'Address is required'),
+    capacity: z.coerce.number().int().min(1, 'Capacity must be at least 1'),
+    pricePerHour: z.coerce.number().int().min(0, 'Price cannot be negative'),
+    bookingFee: z.coerce.number().int().min(0).optional(),
+    coverImage: z.string().min(1, 'Upload a cover image'),
+    noiseLevel: z.enum(['QUIET', 'MODERATE', 'LOUD']),
+    amenities: z.array(z.string()),
+    moods: z.array(z.string()),
+    bestFor: z.array(z.string()),
+    timeOfDay: z.array(z.string()),
+    isPublished: z.boolean(),
+    payoutMethod: z.enum(['PHONE', 'PAYBILL', 'TILL']),
+    payoutPhone: z.string().optional().default(''),
+    payoutTill: z.string().optional().default(''),
+    payoutPaybill: z.string().optional().default(''),
+    payoutAccount: z.string().optional().default(''),
+  })
+  .superRefine((val, ctx) => {
+    if (val.payoutMethod === 'PHONE') {
+      if (!PHONE_REGEX.test(val.payoutPhone.trim())) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['payoutPhone'],
+          message: 'Use a valid Kenyan number e.g. 0712345678',
+        });
+      }
+    } else if (val.payoutMethod === 'TILL') {
+      if (!SHORTCODE_REGEX.test(val.payoutTill.trim())) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['payoutTill'],
+          message: 'Till number is 5–7 digits, e.g. 5100200',
+        });
+      }
+    } else {
+      if (!SHORTCODE_REGEX.test(val.payoutPaybill.trim())) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['payoutPaybill'],
+          message: 'Paybill number is 5–7 digits, e.g. 400200',
+        });
+      }
+      if (!val.payoutAccount.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['payoutAccount'],
+          message: 'Enter the account number for this Paybill',
+        });
+      }
+    }
+  });
 
 export type SpaceFormValues = z.infer<typeof spaceFormSchema>;
+/** What the form emits on submit — the UI-only method selector is stripped out. */
+export type SpaceFormPayload = Omit<SpaceFormValues, 'payoutMethod'>;
 
 export const SPACE_FORM_EMPTY_DEFAULTS: SpaceFormValues = {
   name: '',
@@ -98,12 +143,16 @@ export const SPACE_FORM_EMPTY_DEFAULTS: SpaceFormValues = {
   bestFor: [],
   timeOfDay: [],
   isPublished: true,
+  payoutMethod: 'PHONE',
   payoutPhone: '',
+  payoutTill: '',
+  payoutPaybill: '',
+  payoutAccount: '',
 };
 
 interface SpaceFormProps {
   defaultValues: SpaceFormValues;
-  onSubmit: (values: SpaceFormValues) => Promise<void> | void;
+  onSubmit: (values: SpaceFormPayload) => Promise<void> | void;
   onCancel: () => void;
   submitLabel: string;
 }
@@ -123,9 +172,21 @@ export function SpaceForm({ defaultValues, onSubmit, onCancel, submitLabel }: Sp
 
   const [coverUploadedNow, setCoverUploadedNow] = useState(false);
   const coverImage = watch('coverImage');
+  const payoutMethod = watch('payoutMethod');
+
+  // Strip the UI-only method selector and clear the payout fields the owner
+  // didn't choose, so exactly one destination is persisted.
+  const submit = ({ payoutMethod: method, ...rest }: SpaceFormValues) =>
+    onSubmit({
+      ...rest,
+      payoutPhone: method === 'PHONE' ? rest.payoutPhone.trim() : '',
+      payoutTill: method === 'TILL' ? rest.payoutTill.trim() : '',
+      payoutPaybill: method === 'PAYBILL' ? rest.payoutPaybill.trim() : '',
+      payoutAccount: method === 'PAYBILL' ? rest.payoutAccount.trim() : '',
+    });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(submit)} className="space-y-6">
       <FormSection title="Basics" description="The headline details guests see first.">
         <Input
           label="Name"
@@ -204,15 +265,52 @@ export function SpaceForm({ defaultValues, onSubmit, onCancel, submitLabel }: Sp
         title="Payouts"
         description="After a customer pays, your share lands here. We disburse on a rolling basis (see the Earnings tab)."
       >
-        <Input
-          label="M-Pesa phone number"
-          type="tel"
-          inputMode="numeric"
-          placeholder="0712 345 678"
-          hint="Used as the destination for your booking earnings."
-          error={errors.payoutPhone?.message}
-          {...register('payoutPhone')}
+        <Select
+          label="Payout method"
+          options={PAYOUT_METHODS.map((m) => ({ label: m.label, value: m.value }))}
+          hint="How your booking earnings are settled via M-Pesa."
+          error={errors.payoutMethod?.message}
+          {...register('payoutMethod')}
         />
+
+        {payoutMethod === 'PHONE' && (
+          <Input
+            label="M-Pesa phone number"
+            type="tel"
+            inputMode="numeric"
+            placeholder="0712 345 678"
+            error={errors.payoutPhone?.message}
+            {...register('payoutPhone')}
+          />
+        )}
+
+        {payoutMethod === 'TILL' && (
+          <Input
+            label="Till number (Buy Goods)"
+            inputMode="numeric"
+            placeholder="5100200"
+            error={errors.payoutTill?.message}
+            {...register('payoutTill')}
+          />
+        )}
+
+        {payoutMethod === 'PAYBILL' && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input
+              label="Paybill number"
+              inputMode="numeric"
+              placeholder="400200"
+              error={errors.payoutPaybill?.message}
+              {...register('payoutPaybill')}
+            />
+            <Input
+              label="Account number"
+              placeholder="e.g. business account ref"
+              error={errors.payoutAccount?.message}
+              {...register('payoutAccount')}
+            />
+          </div>
+        )}
       </FormSection>
 
       <FormSection

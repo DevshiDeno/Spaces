@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/useToast';
 import {
   SpaceForm,
   SPACE_FORM_EMPTY_DEFAULTS,
-  type SpaceFormValues,
+  type SpaceFormPayload,
 } from '@/features/dashboard/SpaceForm';
 
 export default function DashboardSpaceNewPage() {
@@ -13,7 +13,7 @@ export default function DashboardSpaceNewPage() {
   const toast = useToast();
   const create = useCreateVenue();
 
-  async function handleSubmit(values: SpaceFormValues) {
+  async function handleSubmit(values: SpaceFormPayload) {
     try {
       const venue = await create.mutateAsync(values);
       toast.success('Space created', `${venue.name} is ${venue.isPublished ? 'live' : 'a draft'}.`);

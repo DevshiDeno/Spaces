@@ -87,8 +87,17 @@ export default function DashboardPayoutsPage() {
                   <div className="mt-3 grid gap-4 text-sm sm:grid-cols-3">
                     <Field
                       label="Pay to"
-                      value={b.venue?.payoutPhone ?? b.venue?.payoutTill ?? 'No payout target set'}
-                      missing={!b.venue?.payoutPhone && !b.venue?.payoutTill}
+                      value={
+                        b.venue?.payoutPhone ??
+                        b.venue?.payoutTill ??
+                        (b.venue?.payoutPaybill
+                          ? `Paybill ${b.venue.payoutPaybill} · Acc ${b.venue.payoutAccount ?? ''}`
+                          : undefined) ??
+                        'No payout target set'
+                      }
+                      missing={
+                        !b.venue?.payoutPhone && !b.venue?.payoutTill && !b.venue?.payoutPaybill
+                      }
                       copy
                     />
                     <Field
@@ -120,7 +129,10 @@ export default function DashboardPayoutsPage() {
                           size="sm"
                           fullWidth
                           isLoading={settle.isPending}
-                          disabled={payoutRef.length < 3 || !(b.venue?.payoutPhone || b.venue?.payoutTill)}
+                          disabled={
+                            payoutRef.length < 3 ||
+                            !(b.venue?.payoutPhone || b.venue?.payoutTill || b.venue?.payoutPaybill)
+                          }
                           onClick={() => settle.mutate({ id: b.id, ref: payoutRef.trim() })}
                           leftIcon={<Check className="h-3.5 w-3.5" />}
                         >

@@ -80,11 +80,10 @@ export class VenuesService {
 
   async create(ownerId: string, dto: CreateVenueDto) {
     const slug = await this.uniqueSlug(dto.name);
-    const payoutPhone = this.normalizePayoutPhone(dto.payoutPhone);
     return this.prisma.venue.create({
       data: {
         ...dto,
-        payoutPhone,
+        ...this.resolvePayout(dto),
         slug,
         ownerId,
       },
@@ -100,8 +99,13 @@ export class VenuesService {
     if (dto.name && dto.name !== existing.name) {
       data.slug = await this.uniqueSlug(dto.name, id);
     }
-    if (dto.payoutPhone !== undefined) {
-      data.payoutPhone = this.normalizePayoutPhone(dto.payoutPhone);
+    if (
+      dto.payoutPhone !== undefined ||
+      dto.payoutTill !== undefined ||
+      dto.payoutPaybill !== undefined ||
+      dto.payoutAccount !== undefined
+    ) {
+      Object.assign(data, this.resolvePayout(dto));
     }
     return this.prisma.venue.update({ where: { id }, data });
   }
@@ -117,6 +121,47 @@ export class VenuesService {
       );
     }
     return normalized;
+  }
+
+  /**
+   * Normalizes the owner's payout destination. A venue can be paid via one of:
+   * an M-Pesa phone, a Till number, or a Paybill + account number. Blank fields
+   * collapse to null; a Paybill and its account number must be provided together.
+   */
+  private resolvePayout(dto: {
+    payoutPhone?: string;
+    payoutTill?: string;
+    payoutPaybill?: string;
+    payoutAccount?: string;
+  }): {
+    payoutPhone: string | null;
+    payoutTill: string | null;
+    payoutPaybill: string | null;
+    payoutAccount: string | null;
+  } {
+    const till = (dto.payoutTill ?? '').trim();
+    const paybill = (dto.payoutPaybill ?? '').trim();
+    const account = (dto.payoutAccount ?? '').trim();
+
+    if (till && !/^\d{5,7}$/.test(till)) {
+      throw new BadRequestException('Till number must be 5–7 digits (e.g. 5100200).');
+    }
+    if (paybill && !/^\d{5,7}$/.test(paybill)) {
+      throw new BadRequestException('Paybill number must be 5–7 digits (e.g. 400200).');
+    }
+    if (paybill && !account) {
+      throw new BadRequestException('An account number is required when a Paybill is set.');
+    }
+    if (account && !paybill) {
+      throw new BadRequestException('A Paybill number is required when an account number is set.');
+    }
+
+    return {
+      payoutPhone: this.normalizePayoutPhone(dto.payoutPhone),
+      payoutTill: till || null,
+      payoutPaybill: paybill || null,
+      payoutAccount: paybill ? account : null,
+    };
   }
 
   async remove(id: string, user: AuthenticatedUser) {

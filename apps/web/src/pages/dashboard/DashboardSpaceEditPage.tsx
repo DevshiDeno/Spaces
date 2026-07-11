@@ -5,10 +5,17 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useVenue, useUpdateVenue } from '@/hooks/useVenues';
 import { useToast } from '@/hooks/useToast';
-import { SpaceForm, type SpaceFormValues } from '@/features/dashboard/SpaceForm';
+import {
+  SpaceForm,
+  type SpaceFormValues,
+  type SpaceFormPayload,
+} from '@/features/dashboard/SpaceForm';
 import type { Venue } from '@/types';
 
 function toFormValues(v: Venue): SpaceFormValues {
+  // Pick the method to preselect: Paybill and Till take precedence over a phone
+  // when set, matching how a payout target is resolved for disbursement.
+  const payoutMethod = v.payoutPaybill ? 'PAYBILL' : v.payoutTill ? 'TILL' : 'PHONE';
   return {
     name: v.name,
     tagline: v.tagline,
@@ -26,7 +33,11 @@ function toFormValues(v: Venue): SpaceFormValues {
     bestFor: v.bestFor ?? [],
     timeOfDay: v.timeOfDay ?? [],
     isPublished: v.isPublished ?? true,
+    payoutMethod,
     payoutPhone: v.payoutPhone ?? '',
+    payoutTill: v.payoutTill ?? '',
+    payoutPaybill: v.payoutPaybill ?? '',
+    payoutAccount: v.payoutAccount ?? '',
   };
 }
 
@@ -37,7 +48,7 @@ export default function DashboardSpaceEditPage() {
   const { data: venue, isLoading, isError } = useVenue(slug);
   const update = useUpdateVenue();
 
-  async function handleSubmit(values: SpaceFormValues) {
+  async function handleSubmit(values: SpaceFormPayload) {
     if (!venue) return;
     try {
       const updated = await update.mutateAsync({ id: venue.id, payload: values });

@@ -43,6 +43,8 @@ export interface Venue {
   ownerId: ID;
   payoutPhone?: string | null;
   payoutTill?: string | null;
+  payoutPaybill?: string | null;
+  payoutAccount?: string | null;
   createdAt: string;
 }
 
@@ -119,6 +121,8 @@ export interface Booking {
     coverImage?: string;
     payoutPhone?: string | null;
     payoutTill?: string | null;
+    payoutPaybill?: string | null;
+    payoutAccount?: string | null;
     owner?: { id: ID; name: string; email: string };
   };
   user?: { name: string; email?: string };
@@ -184,6 +188,9 @@ export interface DashboardStats {
   totalFiles: number;
   pendingApplications: number;
   pendingSpaces: number;
+  /** Month-over-month change (%). null when there's no prior-month baseline. */
+  bookingsTrend: number | null;
+  revenueTrend: number | null;
 }
 
 export interface PaginatedResponse<T> {

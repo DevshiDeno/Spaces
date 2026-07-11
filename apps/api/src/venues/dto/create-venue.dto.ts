@@ -33,4 +33,8 @@ export class CreateVenueDto {
   @IsOptional() @IsString() payoutPhone?: string;
   @ApiPropertyOptional({ description: 'M-Pesa Till number (preferred over phone if set)' })
   @IsOptional() @IsString() payoutTill?: string;
+  @ApiPropertyOptional({ description: 'M-Pesa Paybill (business) number' })
+  @IsOptional() @IsString() payoutPaybill?: string;
+  @ApiPropertyOptional({ description: 'Account number under the Paybill (required when payoutPaybill is set)' })
+  @IsOptional() @IsString() payoutAccount?: string;
 }
