@@ -84,15 +84,15 @@ export default function DashboardOverviewPage() {
               label="Total Bookings"
               value={formatNumber(stats.totalBookings)}
               icon={CalendarCheck}
-              trend={{ value: '12%', positive: true }}
+              trend={toTrend(stats.bookingsTrend)}
               hint="vs. last month"
             />
             <StatCard
               label="Revenue Overview"
               value={formatCurrency(stats.totalRevenue)}
               icon={Banknote}
-              trend={{ value: '8.4%', positive: true }}
-              hint="Total revenue from bookings"
+              trend={toTrend(stats.revenueTrend)}
+              hint="vs. last month"
             />
             <StatCard
               label="Total Users"
@@ -241,6 +241,11 @@ export default function DashboardOverviewPage() {
       </div>
     </div>
   );
+}
+
+function toTrend(pct: number | null): { value: string; positive: boolean } | undefined {
+  if (pct === null) return undefined;
+  return { value: `${pct}%`, positive: pct >= 0 };
 }
 
 function ActionItem({
