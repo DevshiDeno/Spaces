@@ -55,7 +55,7 @@ export function HeroSection() {
             .
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted-foreground sm:text-xl text-pretty">
-            Book your perfect space or apply to become a verified ally venue. Safer experiences for
+            Book your perfect space or apply to become a verified spacer. Safer experiences for
             every gathering — from listening parties to wellness circles.
           </p>
 
@@ -72,7 +72,7 @@ export function HeroSection() {
               variant="outline"
               onClick={() => navigate('/become-an-ally')}
             >
-              Become a spacer
+              Become a Spacer
             </Button>
           </div>
 

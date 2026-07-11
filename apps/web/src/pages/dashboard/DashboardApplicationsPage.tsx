@@ -77,7 +77,7 @@ export default function DashboardApplicationsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="heading-display text-3xl font-bold tracking-tight">Ally Applications</h1>
+        <h1 className="heading-display text-3xl font-bold tracking-tight">Spacers Applications</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Pending venue applications awaiting review. Approving creates an invited owner account.
         </p>
