@@ -22,6 +22,7 @@ import type { JwtPayload } from './strategies/jwt.strategy';
 import type { User } from '@prisma/client';
 
 const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000; // 1 hour
+const EMAIL_VERIFY_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 @Injectable()
 export class AuthService {
@@ -53,7 +54,62 @@ export class AuthService {
         role: 'USER',
       },
     });
+    await this.issueEmailVerification(user, { welcome: true });
     return this.session(user);
+  }
+
+  /**
+   * Confirms an email from a verification link. Soft verification — the account
+   * already works; this just flips the verified flag and clears the token.
+   */
+  async verifyEmail(token: string): Promise<{ ok: true; alreadyVerified: boolean }> {
+    if (!token) throw new BadRequestException('Missing verification token');
+    const user = await this.prisma.user.findUnique({ where: { emailVerifyToken: token } });
+    if (!user) {
+      // A used token is nulled out, so a not-found could mean "already verified".
+      throw new NotFoundException('Verification link is invalid or already used');
+    }
+    if (user.emailVerifyExpiresAt && user.emailVerifyExpiresAt.getTime() < Date.now()) {
+      throw new BadRequestException(
+        'This verification link has expired. Request a fresh one from your dashboard.'
+      );
+    }
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerifiedAt: new Date(),
+        emailVerifyToken: null,
+        emailVerifyExpiresAt: null,
+      },
+    });
+    return { ok: true, alreadyVerified: false };
+  }
+
+  /** Re-sends a verification link for the signed-in user. No-op if already verified. */
+  async resendVerification(userId: string): Promise<{ ok: true }> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException();
+    if (!user.emailVerifiedAt) {
+      await this.issueEmailVerification(user, { welcome: false });
+    }
+    return { ok: true };
+  }
+
+  /** Issues a fresh verification token and emails the link (welcome copy on signup). */
+  private async issueEmailVerification(user: User, opts: { welcome: boolean }) {
+    const token = randomBytes(32).toString('base64url');
+    const expiresAt = new Date(Date.now() + EMAIL_VERIFY_TTL_MS);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { emailVerifyToken: token, emailVerifyExpiresAt: expiresAt },
+    });
+    const base = this.config.get<string>('webAppUrl') ?? 'http://localhost:5173';
+    const verifyUrl = `${base.replace(/\/$/, '')}/verify-email/${token}`;
+    if (opts.welcome) {
+      void this.mail.sendWelcome({ to: user.email, name: user.name, verifyUrl, expiresAt });
+    } else {
+      void this.mail.sendVerifyEmail({ to: user.email, name: user.name, verifyUrl, expiresAt });
+    }
   }
 
   async login(dto: LoginDto) {
@@ -75,7 +131,8 @@ export class AuthService {
       select: this.userSelect,
     });
     if (!user) throw new UnauthorizedException();
-    return user;
+    const { emailVerifiedAt, ...rest } = user;
+    return { ...rest, emailVerified: emailVerifiedAt != null };
   }
 
   async getInvite(token: string) {
@@ -177,6 +234,7 @@ export class AuthService {
         avatarUrl: user.avatarUrl,
         role: user.role,
         isSpaceOwner: user.isSpaceOwner,
+        emailVerified: user.emailVerifiedAt != null,
         createdAt: user.createdAt,
       },
     };
@@ -189,6 +247,7 @@ export class AuthService {
     avatarUrl: true,
     role: true,
     isSpaceOwner: true,
+    emailVerifiedAt: true,
     createdAt: true,
   } as const;
 }

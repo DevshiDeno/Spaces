@@ -50,6 +50,18 @@ export const authService = {
     return data;
   },
 
+  async verifyEmail(token: string): Promise<{ ok: true; alreadyVerified: boolean }> {
+    const { data } = await http.post<{ ok: true; alreadyVerified: boolean }>(
+      `/auth/verify-email/${encodeURIComponent(token)}`
+    );
+    return data;
+  },
+
+  async resendVerification(): Promise<{ ok: true }> {
+    const { data } = await http.post<{ ok: true }>('/auth/verify-email/resend');
+    return data;
+  },
+
   async requestPasswordReset(email: string): Promise<{ ok: true }> {
     const { data } = await http.post<{ ok: true }>('/auth/password-reset/request', {
       email,

@@ -9,6 +9,8 @@ import {
   passwordResetEmail,
   payoutSettledEmail,
   rsvpConfirmationEmail,
+  verifyEmailTemplate,
+  welcomeEmail,
 } from './mail.templates';
 
 export interface SendArgs {
@@ -77,6 +79,16 @@ export class MailService implements OnModuleInit {
 
   sendAllyInvite(args: { to: string; applicantName: string; inviteUrl: string; expiresAt: Date }) {
     const { subject, html } = allyInviteEmail(args);
+    return this.send({ to: args.to, subject, html });
+  }
+
+  sendWelcome(args: { to: string; name: string; verifyUrl: string; expiresAt: Date }) {
+    const { subject, html } = welcomeEmail(args);
+    return this.send({ to: args.to, subject, html });
+  }
+
+  sendVerifyEmail(args: { to: string; name: string; verifyUrl: string; expiresAt: Date }) {
+    const { subject, html } = verifyEmailTemplate(args);
     return this.send({ to: args.to, subject, html });
   }
 

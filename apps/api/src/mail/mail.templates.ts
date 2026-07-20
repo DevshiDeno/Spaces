@@ -62,6 +62,37 @@ export function allyInviteEmail(input: {
   return { subject, html };
 }
 
+export function welcomeEmail(input: {
+  name: string;
+  verifyUrl: string;
+  expiresAt: Date;
+}) {
+  const subject = `Welcome to ${BRAND}`;
+  const html = layout({
+    heading: `Welcome, ${input.name.split(' ')[0]}!`,
+    body: `<p>Thanks for joining ${BRAND} — inclusive venues and creative connections across Kenya.</p>
+           <p>Confirm your email so we can send you booking confirmations and keep your account secure.</p>
+           <p style="color:#857e77;font-size:13px;">This link expires on ${input.expiresAt.toUTCString()}. You can keep using your account in the meantime.</p>`,
+    cta: { label: 'Confirm your email', href: input.verifyUrl },
+  });
+  return { subject, html };
+}
+
+export function verifyEmailTemplate(input: {
+  name: string;
+  verifyUrl: string;
+  expiresAt: Date;
+}) {
+  const subject = `Confirm your ${BRAND} email`;
+  const html = layout({
+    heading: 'Confirm your email',
+    body: `<p>Hi ${input.name.split(' ')[0]}, tap the button below to verify this email address.</p>
+           <p style="color:#857e77;font-size:13px;">This link expires on ${input.expiresAt.toUTCString()}. If you didn't request this, you can ignore it.</p>`,
+    cta: { label: 'Confirm your email', href: input.verifyUrl },
+  });
+  return { subject, html };
+}
+
 export function passwordResetEmail(input: {
   name: string;
   resetUrl: string;

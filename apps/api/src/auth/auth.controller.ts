@@ -88,4 +88,23 @@ export class AuthController {
   ) {
     return this.auth.confirmPasswordReset(token, dto);
   }
+
+  @Public()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Post('verify-email/:token')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Confirm an email address using a verification token' })
+  verifyEmail(@Param('token') token: string) {
+    return this.auth.verifyEmail(token);
+  }
+
+  @Post('verify-email/resend')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Re-send the verification email for the signed-in user' })
+  resendVerification(@CurrentUser() user: AuthenticatedUser) {
+    return this.auth.resendVerification(user.id);
+  }
 }

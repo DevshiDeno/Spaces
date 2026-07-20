@@ -25,6 +25,7 @@ const SignUpPage = lazy(() => import('@/pages/auth/SignUpPage'));
 const AcceptInvitePage = lazy(() => import('@/pages/auth/AcceptInvitePage'));
 const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('@/pages/auth/ResetPasswordPage'));
+const VerifyEmailPage = lazy(() => import('@/pages/auth/VerifyEmailPage'));
 
 const DashboardOverviewPage = lazy(() => import('@/pages/dashboard/DashboardOverviewPage'));
 const DashboardSpacesPage = lazy(() => import('@/pages/dashboard/DashboardSpacesPage'));
@@ -69,6 +70,7 @@ export const router = createBrowserRouter([
       { path: '/accept-invite/:token', element: withSuspense(<AcceptInvitePage />) },
       { path: '/forgot-password', element: withSuspense(<ForgotPasswordPage />) },
       { path: '/reset-password/:token', element: withSuspense(<ResetPasswordPage />) },
+      { path: '/verify-email/:token', element: withSuspense(<VerifyEmailPage />) },
     ],
   },
   {

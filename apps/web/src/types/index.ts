@@ -9,6 +9,7 @@ export interface User {
   avatarUrl?: string;
   role: UserRole;
   isSpaceOwner?: boolean;
+  emailVerified?: boolean;
   createdAt: string;
 }
 

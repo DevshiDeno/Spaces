@@ -19,6 +19,7 @@ import { Logo } from '@/components/ui/Logo';
 import { Button } from '@/components/ui/Button';
 import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { useAuthStore } from '@/store/auth.store';
+import { EmailVerificationBanner } from '@/components/common/EmailVerificationBanner';
 import { hasDashboardRole, type DashboardRole } from '@/routes/RoleGate';
 import { cn } from '@/utils/cn';
 
@@ -135,6 +136,7 @@ export function DashboardLayout() {
         </header>
 
         <main className="flex-1 p-6 lg:p-10">
+          <EmailVerificationBanner />
           <Outlet />
         </main>
       </div>
