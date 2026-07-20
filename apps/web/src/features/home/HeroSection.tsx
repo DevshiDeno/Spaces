@@ -19,9 +19,10 @@ export function HeroSection() {
         <img
           src="/images/hero-bg.jpg"
           alt=""
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover object-center"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-background/70 via-background/55 to-coral-500/30 dark:from-background/80 dark:via-background/70 dark:to-coral-700/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/40 dark:from-background dark:via-background/90 dark:to-background/50" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/75 via-transparent to-transparent dark:from-background/85" />
         <div className="absolute inset-0 bg-grain opacity-60 mix-blend-overlay" />
       </div>
 
