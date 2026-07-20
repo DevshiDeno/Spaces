@@ -89,15 +89,8 @@ export class AuthController {
     return this.auth.confirmPasswordReset(token, dto);
   }
 
-  @Public()
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
-  @Post('verify-email/:token')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Confirm an email address using a verification token' })
-  verifyEmail(@Param('token') token: string) {
-    return this.auth.verifyEmail(token);
-  }
-
+  // NOTE: this static route MUST be declared before `verify-email/:token`,
+  // otherwise Express matches "resend" as a token and this never runs.
   @Post('verify-email/resend')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -106,5 +99,14 @@ export class AuthController {
   @ApiOperation({ summary: 'Re-send the verification email for the signed-in user' })
   resendVerification(@CurrentUser() user: AuthenticatedUser) {
     return this.auth.resendVerification(user.id);
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Post('verify-email/:token')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Confirm an email address using a verification token' })
+  verifyEmail(@Param('token') token: string) {
+    return this.auth.verifyEmail(token);
   }
 }
