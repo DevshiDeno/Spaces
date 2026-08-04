@@ -31,6 +31,9 @@ const DashboardOverviewPage = lazy(() => import('@/pages/dashboard/DashboardOver
 const DashboardSpacesPage = lazy(() => import('@/pages/dashboard/DashboardSpacesPage'));
 const DashboardSpaceNewPage = lazy(() => import('@/pages/dashboard/DashboardSpaceNewPage'));
 const DashboardSpaceEditPage = lazy(() => import('@/pages/dashboard/DashboardSpaceEditPage'));
+const DashboardEventsPage = lazy(() => import('@/pages/dashboard/DashboardEventsPage'));
+const DashboardEventNewPage = lazy(() => import('@/pages/dashboard/DashboardEventNewPage'));
+const DashboardEventEditPage = lazy(() => import('@/pages/dashboard/DashboardEventEditPage'));
 const DashboardApplicationsPage = lazy(() => import('@/pages/dashboard/DashboardApplicationsPage'));
 const DashboardBookingsPage = lazy(() => import('@/pages/dashboard/DashboardBookingsPage'));
 const DashboardCalendarPage = lazy(() => import('@/pages/dashboard/DashboardCalendarPage'));
@@ -104,6 +107,30 @@ export const router = createBrowserRouter([
         element: (
           <RoleGate allow={['SPACE_OWNER', 'ADMIN']}>
             {withSuspense(<DashboardSpaceEditPage />)}
+          </RoleGate>
+        ),
+      },
+      {
+        path: 'events',
+        element: (
+          <RoleGate allow={['SPACE_OWNER', 'ADMIN']}>
+            {withSuspense(<DashboardEventsPage />)}
+          </RoleGate>
+        ),
+      },
+      {
+        path: 'events/new',
+        element: (
+          <RoleGate allow={['SPACE_OWNER', 'ADMIN']}>
+            {withSuspense(<DashboardEventNewPage />)}
+          </RoleGate>
+        ),
+      },
+      {
+        path: 'events/:slug/edit',
+        element: (
+          <RoleGate allow={['SPACE_OWNER', 'ADMIN']}>
+            {withSuspense(<DashboardEventEditPage />)}
           </RoleGate>
         ),
       },

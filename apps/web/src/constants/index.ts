@@ -4,7 +4,7 @@ export const APP_DESCRIPTION =
   'Discover, book, and host inclusive creative venues across Kenya. Safer experiences for everyone.';
 
 export const SUPPORT_EMAIL = 'support@spaces.co.ke';
-export const SUPPORT_PHONE = '+254 700 000 000';
+export const SUPPORT_PHONE = '+254 18 705 129';
 export const COMPANY_LOCATION = 'Nairobi, Kenya';
 
 export const SOCIAL_LINKS = {

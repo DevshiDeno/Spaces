@@ -4,12 +4,15 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { PaymentsService } from '@/payments/payments.service';
 import { MailService } from '@/mail/mail.service';
 import { slugify } from '@/common/utils/slug';
 import { CreateEventDto } from './dto/create-event.dto';
+import { UpdateEventDto } from './dto/update-event.dto';
 import { RsvpDto } from './dto/rsvp.dto';
+import type { AuthenticatedUser } from '@/common/decorators/current-user.decorator';
 
 @Injectable()
 export class EventsService {
@@ -21,32 +24,78 @@ export class EventsService {
 
   list() {
     return this.prisma.event.findMany({
+      where: { deletedAt: null },
       orderBy: { startDate: 'asc' },
     });
   }
 
   featured() {
     return this.prisma.event.findMany({
-      where: { isFeatured: true },
+      where: { isFeatured: true, deletedAt: null },
       orderBy: { startDate: 'asc' },
       take: 6,
     });
   }
 
   async findBySlug(slug: string) {
-    const event = await this.prisma.event.findUnique({ where: { slug } });
+    const event = await this.prisma.event.findFirst({ where: { slug, deletedAt: null } });
     if (!event) throw new NotFoundException('Event not found');
     return event;
   }
 
-  async create(dto: CreateEventDto) {
+  listForOwner(ownerId: string) {
+    return this.prisma.event.findMany({
+      where: { ownerId, deletedAt: null },
+      orderBy: { startDate: 'asc' },
+    });
+  }
+
+  async create(ownerId: string, dto: CreateEventDto) {
     const slug = await this.uniqueSlug(dto.title);
-    return this.prisma.event.create({ data: { ...dto, slug } });
+    return this.prisma.event.create({ data: { ...dto, slug, ownerId } });
+  }
+
+  async update(id: string, user: AuthenticatedUser, dto: UpdateEventDto) {
+    const existing = await this.prisma.event.findUnique({ where: { id } });
+    if (!existing || existing.deletedAt) throw new NotFoundException('Event not found');
+    this.assertCanManage(existing.ownerId, user);
+
+    const data: Prisma.EventUpdateInput = { ...dto };
+    if (dto.title && dto.title !== existing.title) {
+      data.slug = await this.uniqueSlug(dto.title, id);
+    }
+    return this.prisma.event.update({ where: { id }, data });
+  }
+
+  /**
+   * Soft delete: the row is retained (so RSVP history survives) but hidden from
+   * every listing. We also free the slug — suffixing it with the id — so an owner
+   * can recreate an event with the same title and keep the clean URL.
+   */
+  async remove(id: string, user: AuthenticatedUser) {
+    const existing = await this.prisma.event.findUnique({ where: { id } });
+    if (!existing || existing.deletedAt) throw new NotFoundException('Event not found');
+    this.assertCanManage(existing.ownerId, user);
+    await this.prisma.event.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+        deletedById: user.id,
+        slug: `${existing.slug}-deleted-${existing.id.slice(-8)}`,
+      },
+    });
+    return { ok: true };
+  }
+
+  private assertCanManage(ownerId: string | null, user: AuthenticatedUser) {
+    if (user.role !== 'ADMIN' && user.id !== ownerId) {
+      throw new ForbiddenException('You do not own this event');
+    }
   }
 
   async rsvp(eventId: string, userId: string, dto: RsvpDto) {
     const event = await this.prisma.event.findUnique({ where: { id: eventId } });
-    if (!event) throw new NotFoundException('Event not found');
+    if (!event || event.deletedAt) throw new NotFoundException('Event not found');
 
     const isPaid = event.pricePerTicket > 0;
     const totalAmount = isPaid ? event.pricePerTicket * dto.attendees : 0;
@@ -187,14 +236,15 @@ export class EventsService {
     return rsvp;
   }
 
-  private async uniqueSlug(title: string): Promise<string> {
+  private async uniqueSlug(title: string, ignoreId?: string): Promise<string> {
     const base = slugify(title);
     let candidate = base;
     let n = 1;
-    while (await this.prisma.event.findUnique({ where: { slug: candidate } })) {
+    while (true) {
+      const existing = await this.prisma.event.findUnique({ where: { slug: candidate } });
+      if (!existing || existing.id === ignoreId) return candidate;
       n += 1;
       candidate = `${base}-${n}`;
     }
-    return candidate;
   }
 }

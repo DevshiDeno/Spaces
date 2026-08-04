@@ -89,6 +89,7 @@ export interface AppEvent {
   coverImage: string;
   isFeatured?: boolean;
   organizer: string;
+  ownerId?: ID | null;
 }
 
 export type PaymentMethod = 'MPESA' | 'CARD';

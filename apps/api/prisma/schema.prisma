@@ -80,6 +80,8 @@ model User {
   updatedAt              DateTime  @updatedAt
 
   venues              Venue[]
+  events              Event[]           @relation("EventOrganizer")
+  deletedEvents       Event[]           @relation("EventDeletedBy")
   bookings            Booking[]
   rsvps               Rsvp[]
   reviewedApps        AllyApplication[] @relation("ReviewedApplications")
@@ -143,15 +145,22 @@ model Event {
   coverImage       String
   isFeatured       Boolean  @default(false)
   organizer        String
+  deletedAt        DateTime?          // Soft delete: non-null means archived (hidden from all listings)
+  deletedById      String?            // Who archived it (owner or admin)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   venueId String?
   venue   Venue?  @relation(fields: [venueId], references: [id], onDelete: SetNull)
+  ownerId String?
+  owner   User?   @relation("EventOrganizer", fields: [ownerId], references: [id], onDelete: SetNull)
+  deletedBy User?  @relation("EventDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
   rsvps   Rsvp[]
 
   @@index([slug])
   @@index([startDate])
+  @@index([ownerId])
+  @@index([deletedAt])
 }
 
 model Booking {

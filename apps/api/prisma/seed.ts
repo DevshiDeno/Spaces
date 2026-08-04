@@ -7,6 +7,7 @@ import {
   PaymentMethod,
   PaymentStatus,
   PayoutStatus,
+  type User,
 } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
@@ -98,7 +99,7 @@ async function main() {
     { email: 'daniel.kiprop@example.com', name: 'Daniel Kiprop' },
     { email: 'esther.njeri@example.com', name: 'Esther Njeri' },
   ];
-  const guests = [];
+  const guests: User[] = [];
   for (const gd of guestData) {
     guests.push(
       await prisma.user.upsert({
