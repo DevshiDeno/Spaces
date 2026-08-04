@@ -11,7 +11,7 @@ const values = [
   {
     icon: Shield,
     title: 'Safety First',
-    description: 'Every ally venue completes our safer-space training and code-of-conduct review.',
+    description: 'Every spacer completes our safer-space training and code-of-conduct review.',
   },
   {
     icon: Sparkles,
