@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState, type DragEvent } from 'react';
 import { ImagePlus, Loader2, X } from 'lucide-react';
 import { uploadsService } from '@/services/uploads.service';
+import { getErrorMessage } from '@/services/http';
 import { cn } from '@/utils/cn';
 
 interface ImageUploaderProps {
@@ -44,7 +45,7 @@ export function ImageUploader({
           await onUploaded(uploaded);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Upload failed.');
+        setError(getErrorMessage(err));
       } finally {
         setIsUploading(false);
         setProgress(null);

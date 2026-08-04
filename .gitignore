@@ -12,3 +12,5 @@ build
 coverage
 *.tsbuildinfo
 apps/api/prisma/migrations/.tmp
+.vercel
+.env*

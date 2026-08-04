@@ -71,6 +71,21 @@ export const configuration = (): AppConfig => {
     if (!process.env.WEB_APP_URL) {
       throw new Error('WEB_APP_URL must be set in production (used to build invite links).');
     }
+    // Uploads go directly browser→R2 via a presigned URL. Missing credentials
+    // only surface as a 500 on the first image upload, so fail fast at boot.
+    const missingR2 = [
+      'R2_ACCOUNT_ID',
+      'R2_ACCESS_KEY_ID',
+      'R2_SECRET_ACCESS_KEY',
+      'R2_BUCKET',
+      'R2_ENDPOINT',
+      'R2_PUBLIC_BASE_URL',
+    ].filter((key) => !process.env[key]);
+    if (missingR2.length > 0) {
+      throw new Error(
+        `Cloudflare R2 must be configured in production (image uploads depend on it). Missing: ${missingR2.join(', ')}. See R2_SETUP.md.`
+      );
+    }
   }
 
   return {
